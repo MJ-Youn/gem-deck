@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --bg-deep: #030712; /* Gray 950 */
+    --bg-card: rgba(17, 24, 39, 0.7); /* Gray 900 with opacity */
+    --accent-primary: #6366f1; /* Indigo 500 */
+    --accent-secondary: #a855f7; /* Purple 500 */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    @apply bg-gray-950 text-slate-100 antialiased selection:bg-indigo-500/30 selection:text-indigo-200;
+    
+    /* Global subtle gradient background */
+    background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #030712 100%);
+    min-height: 100vh;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700/50 rounded-full hover:bg-slate-600 transition-colors;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Utilities */
+  .glass {
+    @apply bg-gray-900/60 backdrop-blur-xl border border-white/10 shadow-xl;
+  }
+  
+  .glass-card {
+    @apply bg-gray-900/60 backdrop-blur-xl border border-white/10 shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/20;
+  }
+
+  .glass-input {
+    @apply w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 border border-white/10;
+  }
+
+  .btn-secondary {
+    @apply bg-white/5 text-white hover:bg-white/10 border border-white/10 backdrop-blur-sm;
+  }
+  
+  .btn-ghost {
+    @apply text-slate-400 hover:text-white hover:bg-white/5;
+  }
+
+  .btn-danger {
+    @apply bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/30;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 8s ease-in-out infinite 2s;
+}

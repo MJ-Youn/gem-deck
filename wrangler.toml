@@ -1,0 +1,14 @@
+name = "gem-deck"
+
+compatibility_date = "2025-01-29"
+compatibility_flags = ["nodejs_compat"]
+
+[[r2_buckets]]
+binding = "PPT_STORAGE"
+bucket_name = "ppt-viewer-storage"
+
+[vars]
+# Environment variables for dev (Secrets should be set via `wrangler pages secret put`)
+GOOGLE_CALLBACK_URL = "http://localhost:8788/auth/callback"
+ADMIN_EMAIL = "younmyungjun@gmail.com"
+ENCRYPTION_SECRET = "my-super-secret-key-change-this-in-prod"
