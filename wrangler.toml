@@ -4,8 +4,8 @@ compatibility_date = "2025-01-29"
 compatibility_flags = ["nodejs_compat"]
 
 [[r2_buckets]]
-binding = "PPT_STORAGE"
-bucket_name = "ppt-viewer-storage"
+binding = "GEM_DECK"
+bucket_name = "gem-deck"
 
 [vars]
 # Environment variables for dev (Secrets should be set via `wrangler pages secret put`)

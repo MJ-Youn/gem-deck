@@ -4,7 +4,7 @@ import { load } from 'cheerio'
 import { encryptPath } from '../utils/crypto'
 
 interface Env {
-  PPT_STORAGE: R2Bucket
+  GEM_DECK: R2Bucket
   ENCRYPTION_SECRET: string
 }
 
@@ -53,7 +53,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const randomName = crypto.randomUUID() + '.' + ext
       const key = `image/${email}/${randomName}`
       
-      await env.PPT_STORAGE.put(key, await img.arrayBuffer(), {
+      await env.GEM_DECK.put(key, await img.arrayBuffer(), {
         httpMetadata: { contentType: img.type }
       })
       
@@ -77,7 +77,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // Docs list returns key, but UI expects simple name?
   // Our list API returns full key.
   const htmlKey = `docs/${email}/${htmlFile.name}`
-  await env.PPT_STORAGE.put(htmlKey, $.html(), {
+  await env.GEM_DECK.put(htmlKey, $.html(), {
     httpMetadata: { contentType: 'text/html' }
   })
 

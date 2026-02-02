@@ -3,7 +3,7 @@ import { parse } from 'cookie'
 import { encryptPath } from '../utils/crypto'
 
 interface Env {
-  PPT_STORAGE: R2Bucket
+  GEM_DECK: R2Bucket
   ADMIN_EMAIL: string
   ENCRYPTION_SECRET: string
 }
@@ -27,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const isAdmin = email === env.ADMIN_EMAIL
   const prefix = isAdmin ? 'docs/' : `docs/${email}/`
   
-  const list = await env.PPT_STORAGE.list({ prefix })
+  const list = await env.GEM_DECK.list({ prefix })
   
   const files = await Promise.all(list.objects.map(async o => {
     // Encrypt the full key to make the URL opaque

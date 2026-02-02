@@ -2,7 +2,7 @@ import { parse } from 'cookie'
 import { load } from 'cheerio'
 
 interface Env {
-  PPT_STORAGE: R2Bucket
+  GEM_DECK: R2Bucket
 }
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
@@ -27,7 +27,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const key = `docs/${email}/${filename}`
   
   // 1. Fetch HTML to find associated images
-  const object = await env.PPT_STORAGE.get(key)
+  const object = await env.GEM_DECK.get(key)
   
   if (object) {
     const htmlContent = await object.text()
@@ -49,12 +49,12 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
     // 2. Delete images
     if (imagesToDelete.length > 0) {
-      await Promise.all(imagesToDelete.map(k => env.PPT_STORAGE.delete(k)))
+      await Promise.all(imagesToDelete.map(k => env.GEM_DECK.delete(k)))
     }
   }
 
   // 3. Delete HTML file
-  await env.PPT_STORAGE.delete(key)
+  await env.GEM_DECK.delete(key)
 
   return new Response(JSON.stringify({ success: true }), {
     headers: { 'Content-Type': 'application/json' }
@@ -101,16 +101,16 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
     })
   }
 
-  const object = await env.PPT_STORAGE.get(oldKey)
+  const object = await env.GEM_DECK.get(oldKey)
   if (!object) {
     return new Response('File not found', { status: 404 })
   }
 
   // Copy (Put new)
-  await env.PPT_STORAGE.put(newKey, object.body)
+  await env.GEM_DECK.put(newKey, object.body)
 
   // Delete old (Only the HTML file, keep images as they are reused)
-  await env.PPT_STORAGE.delete(oldKey)
+  await env.GEM_DECK.delete(oldKey)
 
   return new Response(JSON.stringify({ success: true, newName }), {
     headers: { 'Content-Type': 'application/json' }

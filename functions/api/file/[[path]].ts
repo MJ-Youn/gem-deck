@@ -1,7 +1,7 @@
 import { decryptPath } from '../../utils/crypto'
 
 interface Env {
-  PPT_STORAGE: R2Bucket
+  GEM_DECK: R2Bucket
   ENCRYPTION_SECRET: string
 }
 
@@ -39,7 +39,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     key = pathParam as string
   }
 
-  const object = await env.PPT_STORAGE.get(key)
+  const object = await env.GEM_DECK.get(key)
 
   if (!object) {
     return new Response('Not Found', { status: 404 })
