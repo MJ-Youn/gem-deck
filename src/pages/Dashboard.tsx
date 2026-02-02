@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Toaster, toast } from 'sonner';
 import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
 
 type DocFile = {
@@ -13,6 +14,8 @@ type DocFile = {
     size: number;
     uploaded: string;
 };
+
+type VerificationState = { type: 'upload'; files: File[] } | { type: 'delete'; filename: string } | null;
 
 /**
  * 대시보드 페이지 컴포넌트
@@ -34,6 +37,7 @@ export function Dashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [editingFile, setEditingFile] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
+    const [verificationState, setVerificationState] = useState<VerificationState>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -65,14 +69,9 @@ export function Dashboard() {
         }
     };
 
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files?.length) {
-            return;
-        }
-
-        const fileList = Array.from(e.target.files);
-        const htmlFile = fileList.find((f) => f.name.endsWith('.html'));
-        const imageFiles = fileList.filter((f) => !f.name.endsWith('.html'));
+    const executeUpload = async (files: File[], token: string) => {
+        const htmlFile = files.find((f) => f.name.endsWith('.html'));
+        const imageFiles = files.filter((f) => !f.name.endsWith('.html'));
 
         if (!htmlFile) {
             toast.error('HTML 파일을 포함해야 합니다.');
@@ -83,6 +82,7 @@ export function Dashboard() {
         const formData = new FormData();
         formData.append('html', htmlFile);
         imageFiles.forEach((img) => formData.append('images', img));
+        formData.append('cf-turnstile-response', token);
 
         try {
             const { data: result } = (await axios.post('/api/upload', formData, {
@@ -103,14 +103,13 @@ export function Dashboard() {
         }
     };
 
-    const handleDelete = async (filename: string) => {
-        if (!confirm('삭제하시겠습니까?')) {
-            return;
-        }
-
+    const executeDelete = async (filename: string, token: string) => {
         try {
             const actualName = filename.split('/').pop();
-            const res = await fetch(`/api/docs/${actualName}`, { method: 'DELETE' });
+            const res = await fetch(`/api/docs/${actualName}`, {
+                method: 'DELETE',
+                headers: { 'X-Turnstile-Token': token },
+            });
             if (res.ok) {
                 toast.success('파일이 삭제되었습니다.');
                 fetchFiles();
@@ -120,6 +119,42 @@ export function Dashboard() {
         } catch {
             toast.error('삭제 오류');
         }
+    };
+
+    const handleVerificationSuccess = (token: string) => {
+        if (!verificationState) return;
+
+        if (verificationState.type === 'upload') {
+            executeUpload(verificationState.files, token);
+        } else if (verificationState.type === 'delete') {
+            executeDelete(verificationState.filename, token);
+        }
+        setVerificationState(null);
+    };
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) {
+            return;
+        }
+
+        const fileList = Array.from(e.target.files);
+        const htmlFile = fileList.find((f) => f.name.endsWith('.html'));
+        
+        if (!htmlFile) {
+            toast.error('HTML 파일을 포함해야 합니다.');
+            return;
+        }
+
+        setVerificationState({ type: 'upload', files: fileList });
+        
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleDelete = async (filename: string) => {
+        setVerificationState({ type: 'delete', filename });
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -501,6 +536,36 @@ export function Dashboard() {
                     </div>
                 )}
             </main>
+
+            {/* Verification Modal */}
+            {verificationState && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="glass-card p-8 rounded-2xl max-w-sm w-full text-center border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-200">
+                        <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4 ring-1 ring-indigo-500/30">
+                            <Check className="w-6 h-6 text-indigo-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">사람인지 확인이 필요합니다</h3>
+                        <p className="text-slate-400 text-sm mb-6">
+                            보안을 위해 {verificationState.type === 'upload' ? '업로드' : '삭제'} 전 확인 과정을 거칩니다.
+                        </p>
+
+                        <div className="flex justify-center mb-6">
+                            <Turnstile
+                                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                                onVerify={handleVerificationSuccess}
+                                theme="dark"
+                            />
+                        </div>
+
+                        <button
+                            onClick={() => setVerificationState(null)}
+                            className="text-slate-500 hover:text-white text-sm transition-colors"
+                        >
+                            취소
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <Footer />
 

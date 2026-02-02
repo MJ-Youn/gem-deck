@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Sparkles } from 'lucide-react';
+import Turnstile from 'react-turnstile';
 
 export function Login() {
     const navigate = useNavigate();
+    const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
         checkAuth();
@@ -22,7 +24,11 @@ export function Login() {
     };
 
     const handleLogin = () => {
-        window.location.href = '/auth/login';
+        if (!token) {
+            alert('사람인지 확인하는 과정이 필요합니다.');
+            return;
+        }
+        window.location.href = `/auth/login?cf_token=${token}`;
     };
 
     return (
@@ -51,6 +57,14 @@ export function Login() {
                     <span className="text-sm text-slate-500">모던한 팀을 위한 스마트한 선택</span>
                 </p>
 
+
+                <div className="flex justify-center mb-6">
+                    <Turnstile
+                        sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                        onVerify={(token) => setToken(token)}
+                        theme="dark"
+                    />
+                </div>
                 <button
                     onClick={handleLogin}
                     className="btn btn-primary w-full py-4 text-lg group relative overflow-hidden"

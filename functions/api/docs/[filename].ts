@@ -1,8 +1,10 @@
 import { parse } from 'cookie';
 import { load } from 'cheerio';
+import { verifyTurnstile } from '../../utils/turnstile';
 
 interface Env {
     GEM_DECK: R2Bucket;
+    TURNSTILE_SECRET_KEY?: string;
 }
 
 /**
@@ -16,6 +18,15 @@ interface Env {
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
     const { request, params, env } = context;
     const filename = params.filename as string;
+
+    // Turnstile Verification
+    const token = request.headers.get('X-Turnstile-Token');
+    const secretKey = env.TURNSTILE_SECRET_KEY || '1x00000000000000000000AA';
+    const ip = request.headers.get('CF-Connecting-IP') || undefined;
+
+    if (!token || !(await verifyTurnstile(token, secretKey, ip))) {
+        return new Response('Turnstile verification failed', { status: 403 });
+    }
 
     const cookies = parse(request.headers.get('Cookie') || '');
     const cookieValue = cookies['auth_session'];

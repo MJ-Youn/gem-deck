@@ -1,5 +1,30 @@
 export const onRequest: PagesFunction<Env> = async (context) => {
-  const { env } = context
+  const { request, env } = context
+  const url = new URL(request.url)
+  const cfToken = url.searchParams.get('cf_token')
+
+  if (!cfToken) {
+    return new Response('Turnstile token required', { status: 403 })
+  }
+
+  // Verify Turnstile Token
+  // Use env.TURNSTILE_SECRET_KEY if available, otherwise use Test Secret Key
+  const secretKey = env.TURNSTILE_SECRET_KEY || '1x00000000000000000000AA'
+  
+  const formData = new FormData()
+  formData.append('secret', secretKey)
+  formData.append('response', cfToken)
+  formData.append('remoteip', request.headers.get('CF-Connecting-IP') || '')
+
+  const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: formData
+  })
+
+  const outcome = await result.json() as { success: boolean }
+  if (!outcome.success) {
+    return new Response('Turnstile verification failed', { status: 403 })
+  }
   
   const params = new URLSearchParams({
     client_id: env.GOOGLE_CLIENT_ID,
@@ -15,4 +40,5 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 interface Env {
   GOOGLE_CLIENT_ID: string
   GOOGLE_CALLBACK_URL: string
+  TURNSTILE_SECRET_KEY?: string
 }

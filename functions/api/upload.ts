@@ -2,10 +2,12 @@ import { parse } from 'cookie';
 import { load } from 'cheerio';
 
 import { encryptPath } from '../utils/crypto';
+import { verifyTurnstile } from '../utils/turnstile';
 
 interface Env {
     GEM_DECK: R2Bucket;
     ENCRYPTION_SECRET: string;
+    TURNSTILE_SECRET_KEY?: string;
 }
 
 /**
@@ -37,6 +39,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const formData = await request.formData();
+
+    // Turnstile Verification
+    const token = formData.get('cf-turnstile-response') as string;
+    const secretKey = env.TURNSTILE_SECRET_KEY || '1x00000000000000000000AA';
+    const ip = request.headers.get('CF-Connecting-IP') || undefined;
+
+    if (!(await verifyTurnstile(token, secretKey, ip))) {
+        return new Response('Turnstile verification failed', { status: 403 });
+    }
+
     const htmlFile = formData.get('html') as File;
     const imageFiles = formData.getAll('images') as File[];
 

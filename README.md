@@ -49,6 +49,7 @@ Cloudflare Pages에 배포 시 다음 설정이 필수입니다.
 - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
 - `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
 - `GOOGLE_CALLBACK_URL`: OAuth 콜백 URL (예: `https://your-domain.com/auth/callback`)
+- `TURNSTILE_SECRET_KEY`: Cloudflare Turnstile Secret Key (Backend)
 
 ---
 
@@ -57,6 +58,23 @@ Cloudflare Pages에 배포 시 다음 설정이 필수입니다.
 로컬 개발 환경에서 프로젝트를 실행하는 방법입니다.
 
 ### 1. 레포지토리 클론 (Clone)
+
+### 3. Turnstile 설정 (필수)
+
+**Frontend (.env)**:
+`VITE_TURNSTILE_SITE_KEY`를 `.env` 파일에 추가합니다.
+```env
+VITE_TURNSTILE_SITE_KEY=your_site_key_here
+```
+
+**Backend (.dev.vars)**:
+Cloudflare Dashboard에서 발급받은 실제 **Site Key**와 **Secret Key**를 `.dev.vars`에 추가합니다.
+```env
+TURNSTILE_SECRET_KEY=your_secret_key_here
+VITE_TURNSTILE_SITE_KEY=your_site_key_here
+```
+
+운영 환경(Cloudflare Pages)에서는 `Settings > Environment Variables`에 동일한 키를 등록해야 합니다.
 
 ```bash
 git clone https://github.com/MJ-Youn/gem-deck.git
@@ -120,6 +138,18 @@ This project is licensed under the MIT License.
 ---
 
 ## 📅 릴리즈 노트 (Release Notes)
+
+### v1.2.0 (2026-02-02)
+- **보안 강화 (Security)**:
+  - 중요 액션(파일 업로드, 삭제) 시 **Cloudflare Turnstile** 검증 도입.
+  - 로그인 세션 유지 시간을 그대로 두면서 봇 악용 방지.
+- **UI 개선 (UX)**:
+  - **리스트 뷰 이름 변경**: 팝업 대신 인라인 수정 방식으로 변경 (그리드 뷰와 통일).
+  - 대시보드 검증 모달 디자인 적용.
+- **자산 업데이트**:
+  - 새로운 로고 및 파비콘 적용.
+- **SEO**:
+  - `robots.txt` 추가 (개인 페이지 크롤링 방지).
 
 ### v1.1.0 (2026-02-02) - File Rename & Refactoring ✏️
 **"Enhanced Usability & Code Quality"**
