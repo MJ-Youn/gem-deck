@@ -3,7 +3,7 @@
 > **팀을 위한 프리미엄 프레젠테이션 뷰어**  
 > Modern Team Presentation Viewer with Glassmorphism Design
 
-![Gem Deck Preview](/assets/preview.png)
+### 🔗 Service URL: [https://gem-deck.pages.dev](https://gem-deck.pages.dev)
 
 ## 📖 소개 (Introduction)
 
