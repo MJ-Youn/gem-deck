@@ -308,37 +308,42 @@ export function Dashboard() {
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                                <a 
-                                    href={file.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-lg font-medium text-slate-200 group-hover:text-indigo-400 transition-colors block truncate"
-                                >
-                                    {file.display_name || file.name}
-                                </a>
                                 {editingFile === file.name ? (
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <input
-                                            type="text"
-                                            value={renameValue}
-                                            onChange={e => setRenameValue(e.target.value)}
-                                            className="bg-slate-900/50 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-indigo-500 w-full"
-                                            autoFocus
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter') handleSaveRename()
-                                                if (e.key === 'Escape') handleCancelEdit()
-                                            }}
-                                        />
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center">
+                                            <input
+                                                type="text"
+                                                value={renameValue}
+                                                onChange={e => setRenameValue(e.target.value)}
+                                                className="bg-transparent border-b border-indigo-500 px-0 py-0 text-lg font-medium text-white focus:outline-none min-w-[50px]"
+                                                style={{ width: `${Math.max(renameValue.length * 9, 50)}px` }}
+                                                autoFocus
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') handleSaveRename()
+                                                    if (e.key === 'Escape') handleCancelEdit()
+                                                }}
+                                            />
+                                            <span className="text-slate-400 text-lg font-medium">.html</span>
+                                        </div>
                                         <button onClick={handleSaveRename} className="p-1 text-green-400 hover:bg-green-400/10 rounded"><Check size={16} /></button>
                                         <button onClick={handleCancelEdit} className="p-1 text-red-400 hover:bg-red-400/10 rounded"><X size={16} /></button>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
-                                        <span>{(file.size / 1024).toFixed(1)} KB</span>
-                                        <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                                        <span>{new Date(file.uploaded).toLocaleDateString()}</span>
-                                    </div>
+                                    <a 
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-lg font-medium text-slate-200 group-hover:text-indigo-400 transition-colors block truncate"
+                                    >
+                                        {file.display_name || file.name}
+                                    </a>
                                 )}
+                                
+                                <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
+                                    <span>{(file.size / 1024).toFixed(1)} KB</span>
+                                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                    <span>{new Date(file.uploaded).toLocaleDateString()}</span>
+                                </div>
                             </div>
 
                             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-300">
@@ -382,19 +387,23 @@ export function Dashboard() {
                                     {file.name.endsWith('.html') ? <FileText size={32} /> : <ImageIcon size={32} />}
                                 </div>
                                 {editingFile === file.name ? (
-                                    <div className="w-full mb-2 flex flex-col gap-2">
-                                        <input
-                                            type="text"
-                                            value={renameValue}
-                                            onChange={e => setRenameValue(e.target.value)}
-                                            className="bg-slate-900/50 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-indigo-500 w-full text-center"
-                                            autoFocus
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter') handleSaveRename()
-                                                if (e.key === 'Escape') handleCancelEdit()
-                                            }}
-                                            onClick={e => e.stopPropagation()} 
-                                        />
+                                    <div className="w-full mb-2 flex flex-col items-center gap-2">
+                                        <div className="flex items-center justify-center w-full">
+                                            <input
+                                                type="text"
+                                                value={renameValue}
+                                                onChange={e => setRenameValue(e.target.value)}
+                                                className="bg-transparent border-b border-indigo-500 px-0 py-0.5 text-sm text-white font-semibold text-center focus:outline-none min-w-[50px]"
+                                                style={{ width: `${Math.max(renameValue.length * 8, 50)}px` }}
+                                                autoFocus
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') handleSaveRename()
+                                                    if (e.key === 'Escape') handleCancelEdit()
+                                                }}
+                                                onClick={e => e.stopPropagation()} 
+                                            />
+                                            <span className="text-slate-400 text-sm font-semibold">.html</span>
+                                        </div>
                                         <div className="flex items-center justify-center gap-2">
                                             <button onClick={(e) => { e.stopPropagation(); handleSaveRename() }} className="p-1 text-green-400 hover:bg-green-400/10 rounded"><Check size={16} /></button>
                                             <button onClick={(e) => { e.stopPropagation(); handleCancelEdit() }} className="p-1 text-red-400 hover:bg-red-400/10 rounded"><X size={16} /></button>
