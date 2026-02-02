@@ -139,6 +139,17 @@ This project is licensed under the MIT License.
 
 ## 📅 릴리즈 노트 (Release Notes)
 
+### v1.2.1 (2026-02-02) - Admin Features & Refactoring 🛠️
+**"Enhanced Admin Capabilities & Code Cleanup"**
+
+- **✨ 기능 추가 (Features)**:
+  - **링크 복사 (Copy Link)**: Dashboard 및 Admin Dashboard의 리스트/그리드 뷰에서 파일 링크 즉시 복사 기능 추가.
+  - **시스템 상태 링크 (Admin)**: Admin Dashboard의 Status Card(Google, Cloudflare, R2) 클릭 시 해당 서비스 대시보드로 이동.
+- **🧹 리팩토링 & 정리 (Refactoring & Cleanup)**:
+  - **Global Rules**: 모든 TSX 소스 코드에 한글 Javadoc(Author: 윤명준) 및 코딩 컨벤션 적용.
+  - **Logging**: 불필요한 `console.log`, `console.error` 제거.
+  - **Cleanup**: 사용하지 않는 `Viewer.tsx` 컴포넌트 및 라우트 제거.
+
 ### v1.2.0 (2026-02-02)
 - **보안 강화 (Security)**:
   - 중요 액션(파일 업로드, 삭제) 시 **Cloudflare Turnstile** 검증 도입.

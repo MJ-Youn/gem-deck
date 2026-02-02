@@ -40,7 +40,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const formData = await request.formData();
 
-    // Turnstile Verification
+    // Turnstile 검증
     const token = formData.get('cf-turnstile-response') as string;
     const secretKey = env.TURNSTILE_SECRET_KEY || '1x00000000000000000000AA';
     const ip = request.headers.get('CF-Connecting-IP') || undefined;

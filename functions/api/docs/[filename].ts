@@ -19,7 +19,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     const { request, params, env } = context;
     const filename = params.filename as string;
 
-    // Turnstile Verification
+    // Turnstile 검증
     const token = request.headers.get('X-Turnstile-Token');
     const secretKey = env.TURNSTILE_SECRET_KEY || '1x00000000000000000000AA';
     const ip = request.headers.get('CF-Connecting-IP') || undefined;

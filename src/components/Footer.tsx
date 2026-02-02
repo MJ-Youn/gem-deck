@@ -15,7 +15,9 @@ export const Footer = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     {/* Copyright Section */}
                     <div className="text-sm text-slate-500 flex items-center gap-3">
-                        <span className="font-medium">© 2026 <span className="text-slate-300">윤명준 (MJ Yun)</span></span>
+                        <span className="font-medium">
+                            © 2026 <span className="text-slate-300">윤명준 (MJ Yun)</span>
+                        </span>
                         <span className="w-1 h-1 rounded-full bg-slate-700"></span>
                         <span className="text-slate-600 font-mono text-xs px-2 py-0.5 rounded-full bg-slate-900 border border-white/5">{APP_VERSION}</span>
                     </div>

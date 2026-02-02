@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X } from 'lucide-react';
+import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
@@ -38,6 +38,7 @@ export function Dashboard() {
     const [editingFile, setEditingFile] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [verificationState, setVerificationState] = useState<VerificationState>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -50,6 +51,7 @@ export function Dashboard() {
             const { data } = (await axios.get('/auth/me')) as { data: any };
             setUserName(data.name || data.email.split('@')[0]);
             setUserPicture(data.picture);
+            setIsAdmin(data.isAdmin || false);
             if (!data.authenticated) {
                 navigate('/');
             }
@@ -208,6 +210,20 @@ export function Dashboard() {
         }
     };
 
+    const handleCopyLink = async (url: string) => {
+        if (!url) {
+            toast.error('복사할 링크가 없습니다.');
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(window.location.origin + url);
+            toast.success('링크가 클립보드에 복사되었습니다.');
+        } catch (err) {
+            toast.error('클립보드 복사에 실패했습니다. 새 창으로 열기를 이용해주세요.');
+        }
+    };
+
     const filteredFiles = files.filter((f) => (f.display_name || f.name).toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
@@ -224,9 +240,7 @@ export function Dashboard() {
             <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3 group cursor-pointer hover:opacity-90 transition-opacity">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/20 overflow-hidden">
-                            <img src="/logo.png" alt="Gem Deck" className="w-full h-full object-cover" />
-                        </div>
+                        <img src="/logo.png" alt="Gem Deck" className="w-10 h-10 object-contain" />
                         <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Gem Deck</h1>
                     </div>
 
@@ -246,6 +260,15 @@ export function Dashboard() {
                         </div>
 
                         <div className="flex items-center gap-3 pl-6 border-l border-white/10">
+                            {isAdmin && (
+                                <button
+                                    onClick={() => navigate('/admin')}
+                                    className="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 text-sm font-medium transition-colors border border-indigo-500/20"
+                                >
+                                    Admin
+                                </button>
+                            )}
+
                             {userPicture ? (
                                 <img
                                     src={userPicture}
@@ -421,6 +444,13 @@ export function Dashboard() {
                                         <ExternalLink size={20} />
                                     </a>
                                     <button
+                                        onClick={() => handleCopyLink(file.url || '')}
+                                        className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+                                        title="링크 복사"
+                                    >
+                                        <Copy size={20} />
+                                    </button>
+                                    <button
                                         onClick={() => handleStartEdit(file)}
                                         className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
                                         title="이름 변경"
@@ -516,6 +546,13 @@ export function Dashboard() {
                                         >
                                             <ExternalLink size={16} />
                                         </a>
+                                        <button
+                                            onClick={() => handleCopyLink(file.url || '')}
+                                            className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
+                                            title="링크 복사"
+                                        >
+                                            <Copy size={16} />
+                                        </button>
                                         <button
                                             onClick={() => handleStartEdit(file)}
                                             className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"

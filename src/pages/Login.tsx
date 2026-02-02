@@ -4,6 +4,14 @@ import axios from 'axios';
 import { Sparkles } from 'lucide-react';
 import Turnstile from 'react-turnstile';
 
+/**
+ * 로그인 페이지 컴포넌트입니다.
+ * Turnstile 인증 및 Google OAuth 로그인을 처리합니다.
+ *
+ * @returns JSX.Element 로그인 페이지 UI
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-02
+ */
 export function Login() {
     const navigate = useNavigate();
     const [token, setToken] = useState<string | null>(null);
@@ -41,8 +49,8 @@ export function Login() {
             </div>
 
             <div className="glass-card max-w-md w-full p-8 md:p-12 text-center relative z-10 border-t border-white/20">
-                <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 mb-8 ring-1 ring-white/10 shadow-lg shadow-indigo-500/20">
-                    <img src="/logo.png" alt="Gem Deck Logo" className="w-10 h-10 object-contain" />
+                <div className="mb-8">
+                    <img src="/logo.png" alt="Gem Deck Logo" className="w-20 h-20 object-contain mx-auto" />
                 </div>
 
                 <div className="relative mb-3">

@@ -24,18 +24,24 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   if (!email) return new Response('Unauthorized', { status: 401 })
 
+  // Check for 'scope' query parameter
+  const url = new URL(request.url)
+  const scope = url.searchParams.get('scope')
+
   const isAdmin = email === env.ADMIN_EMAIL
-  const prefix = isAdmin ? 'docs/' : `docs/${email}/`
+  // Admin can see all files ONLY if they explicitly ask for scope=all
+  // Otherwise, they see their own files like regular users
+  const prefix = (isAdmin && scope === 'all') ? 'docs/' : `docs/${email}/`
   
   const list = await env.GEM_DECK.list({ prefix })
   
   const files = await Promise.all(list.objects.map(async o => {
-    // Encrypt the full key to make the URL opaque
+    // 전체 키를 암호화하여 URL을 불투명하게 만듭니다.
     const encryptedPath = await encryptPath(o.key, env.ENCRYPTION_SECRET)
     
     return {
-      key: o.key, // Keep real key for internal logic (delete) if needed, or remove if risk
-      // UI uses 'name' for display currently. We should split it.
+      key: o.key, // 내부 로직(삭제 등)을 위해 실제 키 유지
+      // UI는 현재 표시를 위해 'name'을 사용합니다. 분리해야 합니다.
       name: o.key, 
       display_name: o.key.split('/').pop(),
       url: `/api/file/${encryptedPath}`,
