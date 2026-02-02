@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { Toaster, toast } from 'sonner'
-import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, MoreVertical } from 'lucide-react'
+import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Footer } from '../components/Footer'
 
@@ -20,11 +20,12 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [userName, setUserName] = useState('')
   const [userPicture, setUserPicture] = useState('')
-  const [isAdmin, setIsAdmin] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [searchTerm, setSearchTerm] = useState('')
+  const [editingFile, setEditingFile] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -35,7 +36,6 @@ export function Dashboard() {
   const checkAuth = async () => {
     try {
       const { data } = await axios.get('/auth/me') as { data: any }
-      setIsAdmin(data.isAdmin)
       setUserName(data.name || data.email.split('@')[0])
       setUserPicture(data.picture)
       if (!data.authenticated) navigate('/')
@@ -117,6 +117,41 @@ export function Dashboard() {
     if (e.dataTransfer.files?.length > 0) {
       const syntheticEvent = { target: { files: e.dataTransfer.files } } as any
       handleUpload(syntheticEvent)
+    }
+  }
+
+  const handleStartEdit = (file: DocFile) => {
+    setEditingFile(file.name)
+    // Remove .html for editing
+    setRenameValue(file.display_name?.replace(/\.html$/, '') || file.name.replace(/\.html$/, ''))
+  }
+
+  const handleCancelEdit = () => {
+    setEditingFile(null)
+    setRenameValue('')
+  }
+
+  const handleSaveRename = async () => {
+    if (!editingFile || !renameValue.trim()) return
+
+    try {
+        const actualName = editingFile.split('/').pop()
+        const res = await fetch(`/api/docs/${actualName}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: renameValue })
+        })
+
+        if (res.ok) {
+            toast.success('이름이 변경되었습니다.')
+            handleCancelEdit()
+            fetchFiles()
+        } else {
+            const err = await res.text()
+            toast.error('변경 실패: ' + err)
+        }
+    } catch {
+        toast.error('변경 중 오류 발생')
     }
   }
 
@@ -281,11 +316,29 @@ export function Dashboard() {
                                 >
                                     {file.display_name || file.name}
                                 </a>
-                                <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
-                                    <span>{(file.size / 1024).toFixed(1)} KB</span>
-                                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                                    <span>{new Date(file.uploaded).toLocaleDateString()}</span>
-                                </div>
+                                {editingFile === file.name ? (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <input
+                                            type="text"
+                                            value={renameValue}
+                                            onChange={e => setRenameValue(e.target.value)}
+                                            className="bg-slate-900/50 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-indigo-500 w-full"
+                                            autoFocus
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') handleSaveRename()
+                                                if (e.key === 'Escape') handleCancelEdit()
+                                            }}
+                                        />
+                                        <button onClick={handleSaveRename} className="p-1 text-green-400 hover:bg-green-400/10 rounded"><Check size={16} /></button>
+                                        <button onClick={handleCancelEdit} className="p-1 text-red-400 hover:bg-red-400/10 rounded"><X size={16} /></button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
+                                        <span>{(file.size / 1024).toFixed(1)} KB</span>
+                                        <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                        <span>{new Date(file.uploaded).toLocaleDateString()}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-300">
@@ -298,6 +351,13 @@ export function Dashboard() {
                                 >
                                     <ExternalLink size={20} />
                                 </a>
+                                <button 
+                                    onClick={() => handleStartEdit(file)}
+                                    className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+                                    title="이름 변경"
+                                >
+                                    <Pencil size={20} />
+                                </button>
                                 <button 
                                     onClick={() => handleDelete(file.name)}
                                     className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
@@ -321,9 +381,30 @@ export function Dashboard() {
                                 }`}>
                                     {file.name.endsWith('.html') ? <FileText size={32} /> : <ImageIcon size={32} />}
                                 </div>
-                                <h3 className="font-semibold text-white mb-2 line-clamp-2 w-full" title={file.display_name}>
-                                    {file.display_name || file.name}
-                                </h3>
+                                {editingFile === file.name ? (
+                                    <div className="w-full mb-2 flex flex-col gap-2">
+                                        <input
+                                            type="text"
+                                            value={renameValue}
+                                            onChange={e => setRenameValue(e.target.value)}
+                                            className="bg-slate-900/50 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-indigo-500 w-full text-center"
+                                            autoFocus
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') handleSaveRename()
+                                                if (e.key === 'Escape') handleCancelEdit()
+                                            }}
+                                            onClick={e => e.stopPropagation()} 
+                                        />
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button onClick={(e) => { e.stopPropagation(); handleSaveRename() }} className="p-1 text-green-400 hover:bg-green-400/10 rounded"><Check size={16} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleCancelEdit() }} className="p-1 text-red-400 hover:bg-red-400/10 rounded"><X size={16} /></button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <h3 className="font-semibold text-white mb-2 line-clamp-2 w-full" title={file.display_name}>
+                                        {file.display_name || file.name}
+                                    </h3>
+                                )}
                                 <p className="text-xs text-slate-500 bg-slate-900/50 px-2 py-1 rounded-full border border-white/5">
                                     {(file.size / 1024).toFixed(1)} KB
                                 </p>
@@ -342,6 +423,13 @@ export function Dashboard() {
                                     >
                                         <ExternalLink size={16} />
                                     </a>
+                                     <button 
+                                        onClick={() => handleStartEdit(file)}
+                                        className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
+                                        title="이름 변경"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
                                      <button 
                                         onClick={() => handleDelete(file.name)}
                                         className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"

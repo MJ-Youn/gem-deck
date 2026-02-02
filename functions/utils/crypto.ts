@@ -43,7 +43,7 @@ export async function encryptPath(path: string, secret: string): Promise<string>
   )
   
   // Return IV + Ciphertext as hex
-  return buf2hex(iv) + buf2hex(cipher)
+  return buf2hex(iv.buffer) + buf2hex(cipher)
 }
 
 export async function decryptPath(encryptedHex: string, secret: string): Promise<string | null> {

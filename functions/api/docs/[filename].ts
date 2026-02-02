@@ -60,3 +60,59 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     headers: { 'Content-Type': 'application/json' }
   })
 }
+
+export const onRequestPatch: PagesFunction<Env> = async (context) => {
+  const { request, params, env } = context
+  const filename = params.filename as string
+
+  const cookies = parse(request.headers.get('Cookie') || '')
+  const cookieValue = cookies['auth_session']
+  if (!cookieValue) return new Response('Unauthorized', { status: 401 })
+
+  let email = ''
+  try {
+    const sessionHelper = JSON.parse(cookieValue)
+    email = sessionHelper.email
+  } catch {
+    email = cookieValue
+  }
+
+  if (!email) return new Response('Unauthorized', { status: 401 })
+
+  let body: any
+  try {
+    body = await request.json()
+  } catch {
+    return new Response('Bad Request', { status: 400 })
+  }
+
+  const newNameWithoutExt = body.name
+  if (!newNameWithoutExt) return new Response('Missing name', { status: 400 })
+
+  // Ensure new name has .html extension
+  const newName = newNameWithoutExt.endsWith('.html') ? newNameWithoutExt : `${newNameWithoutExt}.html`
+
+  const oldKey = `docs/${email}/${filename}`
+  const newKey = `docs/${email}/${newName}`
+
+  if (oldKey === newKey) {
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
+  const object = await env.PPT_STORAGE.get(oldKey)
+  if (!object) {
+    return new Response('File not found', { status: 404 })
+  }
+
+  // Copy (Put new)
+  await env.PPT_STORAGE.put(newKey, object.body)
+
+  // Delete old (Only the HTML file, keep images as they are reused)
+  await env.PPT_STORAGE.delete(oldKey)
+
+  return new Response(JSON.stringify({ success: true, newName }), {
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
