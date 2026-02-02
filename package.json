@@ -1,7 +1,7 @@
 {
   "name": "gem-deck",
   "private": true,
-  "version": "1.0.0-20260201",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "wrangler pages dev --port 8789 --proxy 5173 -- npm run dev:frontend",

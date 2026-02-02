@@ -16,6 +16,7 @@ HTML 기반의 프레젠테이션 파일을 아름답게 관리하고 열람할 
 - **📂 스마트 파일 관리**: 드래그 앤 드롭으로 HTML 프레젠테이션 및 관련 이미지 업로드
 - **⚡️ 빠른 뷰어**: Cloudflare Edge Network를 활용한 초고속 로딩
 - **🔒 보안 로그인**: Google 계정 연동을 통한 안전한 사용자 인증
+- **✏️ 파일 이름 변경**: 리스트/그리드 뷰에서 즉시 파일 이름 수정 (확장자 자동 관리)
 - **🔍 편리한 탐색**: 리스트/그리드 뷰 전환 및 검색 기능 제공
 
 ---
@@ -27,8 +28,27 @@ HTML 기반의 프레젠테이션 파일을 아름답게 관리하고 열람할 
 | **Frontend** | React 19, TypeScript, Vite |
 | **Styling** | Tailwind CSS v4, PostCSS, Lucide Icons |
 | **Backend** | Cloudflare Pages Functions (Workers) |
-| **Storage** | Cloudflare R2 (Plans) / KV |
+| **Storage** | Cloudflare R2 (Binding: `GEM_DECK`) |
 | **Package** | npm, yarn |
+
+---
+
+## 🚀 배포 설정 (Deployment Configuration)
+
+Cloudflare Pages에 배포 시 다음 설정이 필수입니다.
+
+### 1. R2 버킷 연결 (Functions)
+`Settings` > `Functions` > `R2 Bucket Bindings`에서 다음 변수를 추가합니다.
+- **Variable name**: `GEM_DECK`
+- **R2 Bucket**: (사용 중인 R2 버킷 이름, 예: `gem-deck`)
+
+### 2. 환경 변수 (Environment Variables)
+`Settings` > `Environment Variables`에서 다음 변수를 추가합니다.
+- `ENCRYPTION_SECRET`: 파일 경로 암호화 키
+- `ADMIN_EMAIL`: 관리자 권한용 이메일
+- `GOOGLE_CLIENT_ID`: Google OAuth Client ID
+- `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
+- `GOOGLE_CALLBACK_URL`: OAuth 콜백 URL (예: `https://your-domain.com/auth/callback`)
 
 ---
 
@@ -75,10 +95,10 @@ npm run dev
 gem-deck/
 ├── 📂 functions/       # Cloudflare Pages Functions (Backend API)
 ├── 📂 src/
-│   ├── 📂 components/  # 재사용 가능한 UI 컴포넌트
-│   ├── 📂 pages/       # 라우트 페이지 (Login, Dashboard, Viewer)
-│   ├── 📜 App.tsx      # 메인 앱 라우터
-│   └── 📜 index.css    # 전역 스타일 (Tailwind v4)
+├── │   ├── 📂 components/  # 재사용 가능한 UI 컴포넌트
+├── │   ├── 📂 pages/       # 라우트 페이지 (Login, Dashboard, Viewer)
+├── │   ├── 📜 App.tsx      # 메인 앱 라우터
+├── │   └── 📜 index.css    # 전역 스타일 (Tailwind v4)
 ├── 📜 package.json
 └── 📜 wrangler.toml    # Cloudflare 설정 파일
 ```
@@ -101,7 +121,19 @@ This project is licensed under the MIT License.
 
 ## 📅 릴리즈 노트 (Release Notes)
 
-### v1.0.0.20260201 (2026-02-01) - Major UI Overhaul ✨
+### v1.1.0 (2026-02-02) - File Rename & Refactoring ✏️
+**"Enhanced Usability & Code Quality"**
+
+- **✏️ 파일 이름 변경 기능**: 
+  - 리스트/그리드 뷰에서 파일을 직접 이름 변경할 수 있습니다.
+  - `.html` 확장자를 자동으로 유지하며 사용자 친화적인 UI를 제공합니다.
+- **🧹 코드 리팩토링 및 표준화**:
+  - 모든 주요 소스 코드(`functions`, `src`)에 **코딩 표준(Korean Javadoc, Braces)** 적용.
+  - 불필요한 코드 제거 및 가독성 향상.
+- **⚙️ 배포 구성 최적화**:
+  - R2 버킷 바인딩 변수를 명확한 이름(`GEM_DECK`)으로 통일.
+
+### v1.0.0-20260201 (2026-02-01) - Major UI Overhaul ✨
 **"Premium Glassmorphism Design Update"**
 
 - **🎨 디자인 전면 개편**: 전체 UI에 Glassmorphism(유리 잔상 효과) 테마 적용

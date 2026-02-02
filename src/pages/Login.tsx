@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export function Login() {
     const navigate = useNavigate();
@@ -36,7 +36,7 @@ export function Login() {
 
             <div className="glass-card max-w-md w-full p-8 md:p-12 text-center relative z-10 border-t border-white/20">
                 <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 mb-8 ring-1 ring-white/10 shadow-lg shadow-indigo-500/20">
-                    <LayoutDashboard className="w-10 h-10 text-indigo-400" />
+                    <img src="/logo.png" alt="Gem Deck Logo" className="w-10 h-10 object-contain" />
                 </div>
 
                 <div className="relative mb-3">
