@@ -13,7 +13,7 @@ interface Env {
  * @param context Pages 컨텍스트
  * @returns 시스템 상태를 포함한 Response
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
+ * @since 2026-02-02
  */
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { request, env } = context;

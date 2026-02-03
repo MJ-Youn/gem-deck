@@ -23,13 +23,13 @@ HTML 기반의 프레젠테이션 파일을 아름답게 관리하고 열람할 
 
 ## 🛠 기술 스택 (Tech Stack)
 
-| Category | Technology |
-|----------|------------|
-| **Frontend** | React 19, TypeScript, Vite |
-| **Styling** | Tailwind CSS v4, PostCSS, Lucide Icons |
-| **Backend** | Cloudflare Pages Functions (Workers) |
-| **Storage** | Cloudflare R2 (Binding: `GEM_DECK`) |
-| **Package** | npm, yarn |
+| Category     | Technology                             |
+| ------------ | -------------------------------------- |
+| **Frontend** | React 19, TypeScript, Vite             |
+| **Styling**  | Tailwind CSS v4, PostCSS, Lucide Icons |
+| **Backend**  | Cloudflare Pages Functions (Workers)   |
+| **Storage**  | Cloudflare R2 (Binding: `GEM_DECK`)    |
+| **Package**  | npm, yarn                              |
 
 ---
 
@@ -38,12 +38,16 @@ HTML 기반의 프레젠테이션 파일을 아름답게 관리하고 열람할 
 Cloudflare Pages에 배포 시 다음 설정이 필수입니다.
 
 ### 1. R2 버킷 연결 (Functions)
+
 `Settings` > `Functions` > `R2 Bucket Bindings`에서 다음 변수를 추가합니다.
+
 - **Variable name**: `GEM_DECK`
 - **R2 Bucket**: (사용 중인 R2 버킷 이름, 예: `gem-deck`)
 
 ### 2. 환경 변수 (Environment Variables)
+
 `Settings` > `Environment Variables`에서 다음 변수를 추가합니다.
+
 - `ENCRYPTION_SECRET`: 파일 경로 암호화 키
 - `ADMIN_EMAIL`: 관리자 권한용 이메일
 - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
@@ -63,12 +67,14 @@ Cloudflare Pages에 배포 시 다음 설정이 필수입니다.
 
 **Frontend (.env)**:
 `VITE_TURNSTILE_SITE_KEY`를 `.env` 파일에 추가합니다.
+
 ```env
 VITE_TURNSTILE_SITE_KEY=your_site_key_here
 ```
 
 **Backend (.dev.vars)**:
 Cloudflare Dashboard에서 발급받은 실제 **Site Key**와 **Secret Key**를 `.dev.vars`에 추가합니다.
+
 ```env
 TURNSTILE_SECRET_KEY=your_secret_key_here
 VITE_TURNSTILE_SITE_KEY=your_site_key_here
@@ -94,7 +100,8 @@ npm install
 ```bash
 npm run dev
 ```
-* 서버는 `http://localhost:8789` 에서 자동으로 시작됩니다.
+
+- 서버는 `http://localhost:8789` 에서 자동으로 시작됩니다.
 
 ---
 
@@ -126,6 +133,7 @@ gem-deck/
 ## 👤 작성자 (Author)
 
 Created by **윤명준 (MJ Yune)**
+
 - GitHub: [@MJ-Youn](https://github.com/MJ-Youn)
 - Email: yun0244@naver.com
 
@@ -140,62 +148,66 @@ This project is licensed under the MIT License.
 ## 📅 릴리즈 노트 (Release Notes)
 
 ### v1.2.2 (2026-02-03) - HTML Editor & Documentation 📝
+
 **"In-Browser Code Editing & Comprehensive Docs"**
 
 - **✨ 기능 추가 (Features)**:
-  - **HTML 코드 편집 (HTML Editor)**: 대시보드에서 HTML 파일을 바로 수정할 수 있는 전용 모나코(Monaco) 에디터 기능 추가.
-  - **UI 개선 (UI Enhancements)**: 버튼 툴팁 추가 및 파일 아이콘/색상 구분 강화.
+    - **HTML 코드 편집 (HTML Editor)**: 대시보드에서 HTML 파일을 바로 수정할 수 있는 전용 모나코(Monaco) 에디터 기능 추가.
+    - **UI 개선 (UI Enhancements)**: 버튼 툴팁 추가 및 파일 아이콘/색상 구분 강화.
 - **📚 문서화 (Documentation)**:
-  - **Javadoc 표준화**: 모든 주요 소스 코드(`src`, `functions`)에 한국어 Javadoc 주석 추가 완료.
+    - **Javadoc 표준화**: 모든 주요 소스 코드(`src`, `functions`)에 한국어 Javadoc 주석 추가 완료.
 - **🧹 리팩토링 (Refactoring)**:
-  - 코드 구조 정리 및 불필요한 파일 정리.
+    - 코드 구조 정리 및 불필요한 파일 정리.
 
 ### v1.2.1 (2026-02-02) - Admin Features & Refactoring 🛠️
+
 **"Enhanced Admin Capabilities & Code Cleanup"**
 
 - **✨ 기능 추가 (Features)**:
-  - **링크 복사 (Copy Link)**: Dashboard 및 Admin Dashboard의 리스트/그리드 뷰에서 파일 링크 즉시 복사 기능 추가.
-  - **시스템 상태 링크 (Admin)**: Admin Dashboard의 Status Card(Google, Cloudflare, R2) 클릭 시 해당 서비스 대시보드로 이동.
+    - **링크 복사 (Copy Link)**: Dashboard 및 Admin Dashboard의 리스트/그리드 뷰에서 파일 링크 즉시 복사 기능 추가.
+    - **시스템 상태 링크 (Admin)**: Admin Dashboard의 Status Card(Google, Cloudflare, R2) 클릭 시 해당 서비스 대시보드로 이동.
 - **🧹 리팩토링 & 정리 (Refactoring & Cleanup)**:
-  - **Global Rules**: 모든 TSX 소스 코드에 한글 Javadoc(Author: 윤명준) 및 코딩 컨벤션 적용.
-  - **Logging**: 불필요한 `console.log`, `console.error` 제거.
-  - **Cleanup**: 사용하지 않는 `Viewer.tsx` 컴포넌트 및 라우트 제거.
+    - **Global Rules**: 모든 TSX 소스 코드에 한글 Javadoc(Author: 윤명준) 및 코딩 컨벤션 적용.
+    - **Logging**: 불필요한 `console.log`, `console.error` 제거.
+    - **Cleanup**: 사용하지 않는 `Viewer.tsx` 컴포넌트 및 라우트 제거.
 
 ### v1.2.0 (2026-02-02)
+
 - **보안 강화 (Security)**:
-  - 중요 액션(파일 업로드, 삭제) 시 **Cloudflare Turnstile** 검증 도입.
-  - 로그인 세션 유지 시간을 그대로 두면서 봇 악용 방지.
+    - 중요 액션(파일 업로드, 삭제) 시 **Cloudflare Turnstile** 검증 도입.
+    - 로그인 세션 유지 시간을 그대로 두면서 봇 악용 방지.
 - **UI 개선 (UX)**:
-  - **리스트 뷰 이름 변경**: 팝업 대신 인라인 수정 방식으로 변경 (그리드 뷰와 통일).
-  - 대시보드 검증 모달 디자인 적용.
+    - **리스트 뷰 이름 변경**: 팝업 대신 인라인 수정 방식으로 변경 (그리드 뷰와 통일).
+    - 대시보드 검증 모달 디자인 적용.
 - **자산 업데이트**:
-  - 새로운 로고 및 파비콘 적용.
+    - 새로운 로고 및 파비콘 적용.
 - **SEO**:
-  - `robots.txt` 추가 (개인 페이지 크롤링 방지).
+    - `robots.txt` 추가 (개인 페이지 크롤링 방지).
 
 ### v1.1.0 (2026-02-02) - File Rename & Refactoring ✏️
+
 **"Enhanced Usability & Code Quality"**
 
-- **✏️ 파일 이름 변경 기능**: 
-  - 리스트/그리드 뷰에서 파일을 직접 이름 변경할 수 있습니다.
-  - `.html` 확장자를 자동으로 유지하며 사용자 친화적인 UI를 제공합니다.
+- **✏️ 파일 이름 변경 기능**:
+    - 리스트/그리드 뷰에서 파일을 직접 이름 변경할 수 있습니다.
+    - `.html` 확장자를 자동으로 유지하며 사용자 친화적인 UI를 제공합니다.
 - **🧹 코드 리팩토링 및 표준화**:
-  - 모든 주요 소스 코드(`functions`, `src`)에 **코딩 표준(Korean Javadoc, Braces)** 적용.
-  - 불필요한 코드 제거 및 가독성 향상.
+    - 모든 주요 소스 코드(`functions`, `src`)에 **코딩 표준(Korean Javadoc, Braces)** 적용.
+    - 불필요한 코드 제거 및 가독성 향상.
 - **⚙️ 배포 구성 최적화**:
-  - R2 버킷 바인딩 변수를 명확한 이름(`GEM_DECK`)으로 통일.
+    - R2 버킷 바인딩 변수를 명확한 이름(`GEM_DECK`)으로 통일.
 
 ### v1.0.0-20260201 (2026-02-01) - Major UI Overhaul ✨
+
 **"Premium Glassmorphism Design Update"**
 
 - **🎨 디자인 전면 개편**: 전체 UI에 Glassmorphism(유리 잔상 효과) 테마 적용
 - **🌗 테마 강화**: Deep Indigo & Violet 그라데이션 기반의 모던 다크 모드 완성
 - **📂 대시보드 개선**:
-  - 리스트 뷰 / 그리드 뷰 전환 기능 추가
-  - 검색 기능 추가
-  - 드래그 앤 드롭 업로드 Zone UX 개선
+    - 리스트 뷰 / 그리드 뷰 전환 기능 추가
+    - 검색 기능 추가
+    - 드래그 앤 드롭 업로드 Zone UX 개선
 - **🔧 기술적 개선**:
-  - `Tailwind CSS v4` 완벽 호환성 확보
-  - `.gitignore` 및 `README.md` 등 프로젝트 설정 파일 표준화
-  - `Outfit` 모던 폰트 적용 가독성 향상
-
+    - `Tailwind CSS v4` 완벽 호환성 확보
+    - `.gitignore` 및 `README.md` 등 프로젝트 설정 파일 표준화
+    - `Outfit` 모던 폰트 적용 가독성 향상

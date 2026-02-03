@@ -13,7 +13,7 @@ interface Env {
  * @param context Pages 컨텍스트
  * @returns 처리 결과 Response
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
+ * @since 2026-02-02
  */
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
     const { request, params, env } = context;
@@ -90,7 +90,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
  * @param context Pages 컨텍스트
  * @returns 처리 결과 Response
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
+ * @since 2026-02-02
  */
 export const onRequestPatch: PagesFunction<Env> = async (context) => {
     const { request, params, env } = context;
