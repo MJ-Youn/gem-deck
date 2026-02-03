@@ -6,6 +6,15 @@ interface Env {
     GOOGLE_CALLBACK_URL: string;
 }
 
+/**
+ * Google OAuth 콜백 요청을 처리합니다.
+ * 인증 코드를 토큰으로 교환하고 사용자 정보를 조회하여 세션 쿠키를 설정합니다.
+ *
+ * @param context Pages 컨텍스트
+ * @returns 리다이렉트 Response
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
 export const onRequest: PagesFunction<Env> = async (context) => {
     const { request, env } = context;
     const url = new URL(request.url);

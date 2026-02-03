@@ -8,6 +8,15 @@ interface Env {
   ENCRYPTION_SECRET: string
 }
 
+/**
+ * 파일 목록 조회 요청을 처리합니다.
+ * 관리자는 모든 파일을, 일반 사용자는 자신의 파일만 조회할 수 있습니다.
+ * 
+ * @param context Pages 컨텍스트
+ * @returns Response 파일 목록 JSON
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { request, env } = context
   const cookies = parse(request.headers.get('Cookie') || '')
@@ -54,13 +63,3 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     headers: { 'Content-Type': 'application/json' }
   })
 }
-
-// Handle DELETE /api/docs/:filename
-// Pages Functions routing for this is tricky if we use same file.
-// Better to check request method or path parameter manually if mapped to same.
-// But wait, /api/docs is list. /api/docs/:filename is delete.
-// We can make a separate file functions/api/docs/[[filename]].ts or handle both here?
-// Actually simpler to have api/docs.ts handle LIST, and api/docs/[filename].ts handle DELETE.
-// Let's stick to user request structure. But for simplicity let's use query param or POST for now?
-// Or just make a delete endpoint: functions/api/delete.ts? 
-// No, RESTful is better. Let's create functions/api/docs/[filename].ts next.

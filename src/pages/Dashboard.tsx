@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, Copy } from 'lucide-react';
+import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, FileCode, Link, File } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
+import { FileEditorModal } from '../components/FileEditorModal';
 
 type DocFile = {
     key: string;
@@ -33,12 +34,17 @@ export function Dashboard() {
     const [userPicture, setUserPicture] = useState('');
     const [uploading, setUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [editingFile, setEditingFile] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [verificationState, setVerificationState] = useState<VerificationState>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    
+    // Editor State
+    const [editorOpen, setEditorOpen] = useState(false);
+    const [editorFile, setEditorFile] = useState<{ key: string; name: string } | null>(null);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -46,6 +52,14 @@ export function Dashboard() {
         fetchFiles();
     }, []);
 
+    /**
+     * 사용자 인증 상태를 확인합니다.
+     * 인증되지 않은 경우 로그인 페이지로 리다이렉트합니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const checkAuth = async () => {
         try {
             const { data } = (await axios.get('/auth/me')) as { data: any };
@@ -60,6 +74,13 @@ export function Dashboard() {
         }
     };
 
+    /**
+     * 서버에서 파일 목록을 조회합니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const fetchFiles = async () => {
         try {
             const { data } = (await axios.get('/api/docs')) as { data: { files: DocFile[] } };
@@ -71,6 +92,18 @@ export function Dashboard() {
         }
     };
 
+
+
+    /**
+     * 파일 업로드를 실행합니다.
+     * HTML 파일과 이미지 파일들을 FormData로 전송합니다.
+     *
+     * @param files 업로드할 파일 배열
+     * @param token Turnstile 인증 토큰
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const executeUpload = async (files: File[], token: string) => {
         const htmlFile = files.find((f) => f.name.endsWith('.html'));
         const imageFiles = files.filter((f) => !f.name.endsWith('.html'));
@@ -105,6 +138,17 @@ export function Dashboard() {
         }
     };
 
+
+
+    /**
+     * 파일 삭제를 실행합니다.
+     *
+     * @param filename 삭제할 파일명
+     * @param token Turnstile 인증 토큰
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const executeDelete = async (filename: string, token: string) => {
         try {
             const actualName = filename.split('/').pop();
@@ -123,6 +167,16 @@ export function Dashboard() {
         }
     };
 
+
+
+    /**
+     * Turnstile 검증 성공 시 호출되는 핸들러입니다.
+     * 업로드 또는 삭제 작업을 계속 진행합니다.
+     *
+     * @param token 검증 토큰
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleVerificationSuccess = (token: string) => {
         if (!verificationState) return;
 
@@ -134,6 +188,16 @@ export function Dashboard() {
         setVerificationState(null);
     };
 
+
+
+    /**
+     * 파일 선택 시 업로드 프로세스를 시작합니다.
+     *
+     * @param e 파일 입력 변경 이벤트
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) {
             return;
@@ -155,15 +219,44 @@ export function Dashboard() {
         }
     };
 
+
+
+    /**
+     * 파일 삭제 프로세스를 시작합니다.
+     *
+     * @param filename 삭제할 파일명
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleDelete = async (filename: string) => {
         setVerificationState({ type: 'delete', filename });
     };
 
+
+
+    /**
+     * 드래그 오버 이벤트를 처리합니다.
+     *
+     * @param e 드래그 이벤트
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(true);
     };
 
+
+
+    /**
+     * 드롭 이벤트를 처리하여 파일을 업로드합니다.
+     *
+     * @param e 드래그 이벤트
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
@@ -173,17 +266,43 @@ export function Dashboard() {
         }
     };
 
+
+
+    /**
+     * 파일 이름 변경 모드를 시작합니다.
+     *
+     * @param file 대상 파일 객체
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleStartEdit = (file: DocFile) => {
         setEditingFile(file.name);
         // Remove .html for editing
         setRenameValue(file.display_name?.replace(/\.html$/, '') || file.name.replace(/\.html$/, ''));
     };
 
+
+
+    /**
+     * 파일 이름 변경을 취소합니다.
+     *
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleCancelEdit = () => {
         setEditingFile(null);
         setRenameValue('');
     };
 
+
+
+    /**
+     * 변경된 파일 이름을 저장합니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleSaveRename = async () => {
         if (!editingFile || !renameValue.trim()) {
             return;
@@ -210,6 +329,30 @@ export function Dashboard() {
         }
     };
 
+
+
+    /**
+     * 파일 편집기를 엽니다.
+     *
+     * @param file 대상 파일 객체
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
+    const handleOpenEditor = (file: DocFile) => {
+        setEditorFile({ key: file.key, name: file.display_name || file.name });
+        setEditorOpen(true);
+    };
+
+
+
+    /**
+     * 파일 링크를 클립보드에 복사합니다.
+     *
+     * @param url 복사할 URL
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleCopyLink = async (url: string) => {
         if (!url) {
             toast.error('복사할 링크가 없습니다.');
@@ -221,6 +364,56 @@ export function Dashboard() {
             toast.success('링크가 클립보드에 복사되었습니다.');
         } catch (err) {
             toast.error('클립보드 복사에 실패했습니다. 새 창으로 열기를 이용해주세요.');
+        }
+    };
+
+
+
+    /**
+     * 파일 확장자에 따른 아이콘을 반환합니다.
+     *
+     * @param filename 파일명
+     * @param size 아이콘 크기
+     * @returns JSX.Element 아이콘 컴포넌트
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
+    const getFileIcon = (filename: string, size: number) => {
+        const ext = filename.split('.').pop()?.toLowerCase();
+        switch (ext) {
+            case 'html': return <FileCode size={size} />;
+            case 'pdf': return <FileText size={size} />;
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+            case 'gif':
+            case 'webp': return <ImageIcon size={size} />;
+            case 'svg': return <FileCode size={size} />;
+            default: return <File size={size} />;
+        }
+    };
+
+
+
+    /**
+     * 파일 확장자에 따른 배경 색상 클래스를 반환합니다.
+     *
+     * @param filename 파일명
+     * @returns string Tailwind CSS 클래스 문자열
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
+    const getFileColor = (filename: string) => {
+        const ext = filename.split('.').pop()?.toLowerCase();
+        switch (ext) {
+            case 'html': return 'bg-gradient-to-br from-orange-500/10 to-amber-500/10 text-orange-400 ring-1 ring-orange-500/20 shadow-lg shadow-orange-500/10';
+            case 'pdf': return 'bg-gradient-to-br from-red-500/10 to-rose-500/10 text-red-400 ring-1 ring-red-500/20 shadow-lg shadow-red-500/10';
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+            case 'gif':
+            case 'webp': return 'bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-blue-400 ring-1 ring-blue-500/20 shadow-lg shadow-blue-500/10';
+            default: return 'bg-gradient-to-br from-slate-500/10 to-gray-500/10 text-slate-400 ring-1 ring-slate-500/20 shadow-lg shadow-slate-500/10';
         }
     };
 
@@ -304,12 +497,14 @@ export function Dashboard() {
                             <button
                                 onClick={() => setViewMode('list')}
                                 className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-indigo-500/20 text-indigo-400 font-medium' : 'text-slate-500 hover:text-slate-300'}`}
+                                title="리스트 뷰"
                             >
                                 <ListIcon size={18} />
                             </button>
                             <button
                                 onClick={() => setViewMode('grid')}
                                 className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-indigo-500/20 text-indigo-400 font-medium' : 'text-slate-500 hover:text-slate-300'}`}
+                                title="그리드 뷰"
                             >
                                 <LayoutGrid size={18} />
                             </button>
@@ -375,13 +570,9 @@ export function Dashboard() {
                                 className="group glass-card p-4 flex items-center gap-5 hover:bg-slate-800/40 border-transparent hover:border-white/10 transition-all"
                             >
                                 <div
-                                    className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${
-                                        file.name.endsWith('.html')
-                                            ? 'bg-gradient-to-br from-orange-500/10 to-amber-500/10 text-orange-400 ring-1 ring-orange-500/20'
-                                            : 'bg-gradient-to-br from-blue-500/10 to-indigo-500/10 text-blue-400 ring-1 ring-blue-500/20'
-                                    }`}
+                                    className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${getFileColor(file.name)}`}
                                 >
-                                    {file.name.endsWith('.html') ? <FileText size={24} /> : <ImageIcon size={24} />}
+                                    {getFileIcon(file.name, 24)}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
@@ -448,8 +639,17 @@ export function Dashboard() {
                                         className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
                                         title="링크 복사"
                                     >
-                                        <Copy size={20} />
+                                        <Link size={20} />
                                     </button>
+                                    {file.name.endsWith('.html') && (
+                                        <button
+                                            onClick={() => handleOpenEditor(file)}
+                                            className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+                                            title="내용 수정"
+                                        >
+                                            <FileCode size={20} />
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => handleStartEdit(file)}
                                         className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
@@ -477,13 +677,9 @@ export function Dashboard() {
                             >
                                 <div className="p-6 flex-1 flex flex-col items-center text-center">
                                     <div
-                                        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300 ${
-                                            file.name.endsWith('.html')
-                                                ? 'bg-orange-500/10 text-orange-400 shadow-lg shadow-orange-500/10 ring-1 ring-orange-500/20'
-                                                : 'bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/20'
-                                        }`}
+                                        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300 ${getFileColor(file.name)}`}
                                     >
-                                        {file.name.endsWith('.html') ? <FileText size={32} /> : <ImageIcon size={32} />}
+                                        {getFileIcon(file.name, 32)}
                                     </div>
                                     {editingFile === file.name ? (
                                         <div className="w-full mb-2 flex flex-col items-center gap-2">
@@ -543,6 +739,7 @@ export function Dashboard() {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                                            title="열기"
                                         >
                                             <ExternalLink size={16} />
                                         </a>
@@ -551,8 +748,17 @@ export function Dashboard() {
                                             className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
                                             title="링크 복사"
                                         >
-                                            <Copy size={16} />
+                                            <Link size={16} />
                                         </button>
+                                        {file.name.endsWith('.html') && (
+                                            <button
+                                                onClick={() => handleOpenEditor(file)}
+                                                className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
+                                                title="내용 수정"
+                                            >
+                                                <FileCode size={16} />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => handleStartEdit(file)}
                                             className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
@@ -563,6 +769,7 @@ export function Dashboard() {
                                         <button
                                             onClick={() => handleDelete(file.name)}
                                             className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                                            title="삭제"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -602,6 +809,20 @@ export function Dashboard() {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* File Editor Modal */}
+            {editorFile && (
+                <FileEditorModal
+                    isOpen={editorOpen}
+                    onClose={() => setEditorOpen(false)}
+                    fileKey={editorFile.key}
+                    fileName={editorFile.name}
+                    onSave={() => {
+                        // 저장 후 필요한 경우 목록 갱신 등을 수행할 수 있음
+                        // 현재는 단순 저장만 수행
+                    }}
+                />
             )}
 
             <Footer />

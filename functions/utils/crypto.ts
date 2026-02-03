@@ -4,7 +4,7 @@
  * @param secret 비밀 키 문자열
  * @returns 생성된 CryptoKey Promise
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-02
+ * @since 2026-02-03
  */
 export async function getCryptoKey(secret: string): Promise<CryptoKey> {
     const enc = new TextEncoder();
@@ -23,10 +23,44 @@ export async function getCryptoKey(secret: string): Promise<CryptoKey> {
     );
 }
 
+
+
+/**
+ * ArrayBuffer를 16진수 문자열로 변환합니다.
+ *
+ * @param buffer 변환할 버퍼
+ * @returns 16진수 문자열
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
+/**
+ * ArrayBuffer를 16진수 문자열로 변환합니다.
+ *
+ * @param buffer 변환할 버퍼
+ * @returns 16진수 문자열
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
 function buf2hex(buffer: ArrayBuffer) {
     return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, '0')).join('');
 }
 
+/**
+ * 16진수 문자열을 Uint8Array로 변환합니다.
+ *
+ * @param hex 16진수 문자열
+ * @returns 변환된 Uint8Array
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
+/**
+ * 16진수 문자열을 Uint8Array로 변환합니다.
+ *
+ * @param hex 16진수 문자열
+ * @returns 변환된 Uint8Array
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
 function hex2buf(hex: string) {
     return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
 }
@@ -38,7 +72,7 @@ function hex2buf(hex: string) {
  * @param secret 비밀 키
  * @returns IV와 암호문이 결합된 16진수 문자열
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-02
+ * @since 2026-02-03
  */
 export async function encryptPath(path: string, secret: string): Promise<string> {
     const key = await getCryptoKey(secret);

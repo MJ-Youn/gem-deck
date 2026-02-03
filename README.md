@@ -139,6 +139,17 @@ This project is licensed under the MIT License.
 
 ## 📅 릴리즈 노트 (Release Notes)
 
+### v1.2.2 (2026-02-03) - HTML Editor & Documentation 📝
+**"In-Browser Code Editing & Comprehensive Docs"**
+
+- **✨ 기능 추가 (Features)**:
+  - **HTML 코드 편집 (HTML Editor)**: 대시보드에서 HTML 파일을 바로 수정할 수 있는 전용 모나코(Monaco) 에디터 기능 추가.
+  - **UI 개선 (UI Enhancements)**: 버튼 툴팁 추가 및 파일 아이콘/색상 구분 강화.
+- **📚 문서화 (Documentation)**:
+  - **Javadoc 표준화**: 모든 주요 소스 코드(`src`, `functions`)에 한국어 Javadoc 주석 추가 완료.
+- **🧹 리팩토링 (Refactoring)**:
+  - 코드 구조 정리 및 불필요한 파일 정리.
+
 ### v1.2.1 (2026-02-02) - Admin Features & Refactoring 🛠️
 **"Enhanced Admin Capabilities & Code Cleanup"**
 

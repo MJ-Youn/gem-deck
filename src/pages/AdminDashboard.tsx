@@ -41,6 +41,14 @@ export function AdminDashboard() {
         checkAuthAndFetchData();
     }, []);
 
+    /**
+     * 인증 상태를 확인하고 관리자 권한이 있는 경우 데이터를 불러옵니다.
+     * 권한이 없으면 사용자 대시보드 또는 메인으로 리다이렉트합니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const checkAuthAndFetchData = async () => {
         try {
             // 1. Check Auth & Admin Status
@@ -61,6 +69,15 @@ export function AdminDashboard() {
         }
     };
 
+
+
+    /**
+     * 시스템 상태(Google, Cloudflare, R2)를 조회합니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const fetchSystemStatus = async () => {
         try {
             const { data } = await axios.get('/api/admin/system');
@@ -70,6 +87,16 @@ export function AdminDashboard() {
         }
     };
 
+
+
+    /**
+     * 모든 파일 목록을 조회합니다.
+     * 관리자 권한으로 scope=all 파라미터를 사용하여 전체 파일을 가져옵니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const fetchFiles = async () => {
         try {
             // 관리자 컨텍스트는 모든 파일 조회를 의미합니다.
@@ -86,6 +113,17 @@ export function AdminDashboard() {
         }
     };
 
+
+
+    /**
+     * 파일을 삭제합니다.
+     * 관리자 권한으로 실행되며, 삭제 전 확인 메시지를 표시합니다.
+     *
+     * @param key 삭제할 파일 키 (경로)
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleDelete = async (key: string) => {
         if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
 
@@ -104,6 +142,16 @@ export function AdminDashboard() {
         }
     };
 
+
+
+    /**
+     * 파일 링크를 클립보드에 복사합니다.
+     *
+     * @param url 복사할 URL
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleCopyLink = async (url: string) => {
         if (!url) {
             toast.error('복사할 링크가 없습니다.');
@@ -134,6 +182,17 @@ export function AdminDashboard() {
         return matchesSearch && matchesUser;
     });
 
+    /**
+     * 시스템 상태 카드 컴포넌트
+     *
+     * @param props.title 서비스명
+     * @param props.status 연결 상태
+     * @param props.icon 아이콘 컴포넌트
+     * @param props.link 대시보드 링크
+     * @returns JSX.Element
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const StatusCard = ({ title, status, icon: Icon, link }: { title: string; status: boolean; icon: any; link: string }) => (
         <a
             href={link}

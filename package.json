@@ -1,7 +1,7 @@
 {
   "name": "gem-deck",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "scripts": {
     "dev": "wrangler pages dev --port 8789 --proxy 5173 -- npm run dev:frontend",
@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "axios": "^1.13.4",
     "cheerio": "^1.0.0",
     "cookie": "^0.6.0",

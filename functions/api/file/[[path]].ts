@@ -5,6 +5,14 @@ interface Env {
   ENCRYPTION_SECRET: string
 }
 
+/**
+ * 암호화된 경로 또는 일반 경로를 통해 파일을 서빙합니다.
+ *
+ * @param context Pages 컨텍스트
+ * @returns Response 파일 내용
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { params, env } = context
   

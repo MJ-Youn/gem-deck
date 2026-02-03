@@ -1,3 +1,12 @@
+/**
+ * 로그인 요청을 처리합니다.
+ * Turnstile 토큰을 검증하고 Google OAuth 인증 URL로 리다이렉트합니다.
+ *
+ * @param context Pages 컨텍스트
+ * @returns 리다이렉트 Response 또는 에러 응답
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context
   const url = new URL(request.url)

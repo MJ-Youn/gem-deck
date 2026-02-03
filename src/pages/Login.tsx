@@ -20,6 +20,14 @@ export function Login() {
         checkAuth();
     }, []);
 
+    /**
+     * 사용자 인증 상태를 확인합니다.
+     * 이미 인증된 경우 대시보드로 리다이렉트합니다.
+     *
+     * @returns Promise<void>
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const checkAuth = async () => {
         try {
             const { data } = (await axios.get('/auth/me')) as { data: any };
@@ -31,6 +39,13 @@ export function Login() {
         }
     };
 
+    /**
+     * 로그인을 시도합니다.
+     * Turnstile 토큰이 있어야 진행됩니다.
+     *
+     * @author 윤명준 (MJ Yune)
+     * @since 2026-02-03
+     */
     const handleLogin = () => {
         if (!token) {
             alert('사람인지 확인하는 과정이 필요합니다.');
