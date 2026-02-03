@@ -25,7 +25,7 @@ export const Footer = () => {
                     {/* Social Links Section */}
                     <div className="flex items-center gap-6">
                         <a
-                            href="https://github.com/MJ-Youn/daily-calorie-db"
+                            href="https://github.com/MJ-Youn/gem-deck"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-slate-500 hover:text-white hover:scale-110 transition-all duration-200"
