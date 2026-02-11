@@ -1,7 +1,7 @@
 import { parse } from 'cookie';
 import { load } from 'cheerio';
 
-import { encryptPath } from '../utils/crypto';
+import { encryptPath, getCryptoKey } from '../utils/crypto';
 import { verifyTurnstile } from '../utils/turnstile';
 
 interface Env {
@@ -63,6 +63,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const imageMapping = new Map<string, string>();
     const usedImages = new Set<string>();
 
+    const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET);
+
     // 2. 이미지 분석
     $('img').each((_, elem) => {
         const src = $(elem).attr('src');
@@ -85,7 +87,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 httpMetadata: { contentType: img.type },
             });
 
-            const encryptedKey = await encryptPath(key, env.ENCRYPTION_SECRET);
+            const encryptedKey = await encryptPath(key, cryptoKey);
             imageMapping.set(img.name, `/api/file/${encryptedKey}`);
         }
     }
