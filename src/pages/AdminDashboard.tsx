@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer';
 type DocFile = {
     key: string;
     name: string;
-    display_name?: string;
+    display_name: string;
     url?: string;
     size: number;
     uploaded: string;
@@ -177,7 +177,8 @@ export function AdminDashboard() {
     ).sort();
 
     const filteredFiles = files.filter((f) => {
-        const matchesSearch = (f.display_name || f.key).toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             f.key.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesUser = selectedUser === 'all' ? true : f.key.includes(`/${selectedUser}/`);
         return matchesSearch && matchesUser;
     });
@@ -368,7 +369,7 @@ export function AdminDashboard() {
                                                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${file.key.endsWith('.html') ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
                                                             {file.key.endsWith('.html') ? <FileText size={16} /> : <ImageIcon size={16} />}
                                                         </div>
-                                                        <span className="font-medium text-white">{file.display_name || 'Unknown'}</span>
+                                                        <span className="font-medium text-white">{file.display_name}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-slate-400 text-sm font-mono">{file.key}</td>

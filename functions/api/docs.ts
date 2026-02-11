@@ -50,9 +50,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     
     return {
       key: o.key, // 내부 로직(삭제 등)을 위해 실제 키 유지
-      // UI는 현재 표시를 위해 'name'을 사용합니다. 분리해야 합니다.
-      name: o.key, 
-      display_name: o.key.split('/').pop(),
+      name: o.key, // 내부 식별자 유지 (이전 'name'의 용도)
+      display_name: o.key.split('/').pop() || o.key, // UI 표시용 이름
       url: `/api/file/${encryptedPath}`,
       size: o.size,
       uploaded: o.uploaded

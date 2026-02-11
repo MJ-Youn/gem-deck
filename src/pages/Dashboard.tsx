@@ -10,7 +10,7 @@ import { FileEditorModal } from '../components/FileEditorModal';
 type DocFile = {
     key: string;
     name: string;
-    display_name?: string;
+    display_name: string;
     url?: string;
     size: number;
     uploaded: string;
@@ -149,9 +149,9 @@ export function Dashboard() {
      * @author 윤명준 (MJ Yune)
      * @since 2026-02-03
      */
-    const executeDelete = async (filename: string, token: string) => {
+    const executeDelete = async (key: string, token: string) => {
         try {
-            const actualName = filename.split('/').pop();
+            const actualName = key.split('/').pop();
             const res = await fetch(`/api/docs/${actualName}`, {
                 method: 'DELETE',
                 headers: { 'X-Turnstile-Token': token },
@@ -276,9 +276,9 @@ export function Dashboard() {
      * @since 2026-02-03
      */
     const handleStartEdit = (file: DocFile) => {
-        setEditingFile(file.name);
+        setEditingFile(file.key);
         // Remove .html for editing
-        setRenameValue(file.display_name?.replace(/\.html$/, '') || file.name.replace(/\.html$/, ''));
+        setRenameValue(file.display_name.replace(/\.html$/, ''));
     };
 
 
@@ -339,7 +339,7 @@ export function Dashboard() {
      * @since 2026-02-03
      */
     const handleOpenEditor = (file: DocFile) => {
-        setEditorFile({ key: file.key, name: file.display_name || file.name });
+        setEditorFile({ key: file.key, name: file.display_name });
         setEditorOpen(true);
     };
 
@@ -417,7 +417,10 @@ export function Dashboard() {
         }
     };
 
-    const filteredFiles = files.filter((f) => (f.display_name || f.name).toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredFiles = files.filter((f) =>
+        f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        f.key.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-slate-200">
@@ -566,17 +569,17 @@ export function Dashboard() {
                     <div className="space-y-3">
                         {filteredFiles.map((file) => (
                             <div
-                                key={file.key || file.name}
+                                key={file.key}
                                 className="group glass-card p-4 flex items-center gap-5 hover:bg-slate-800/40 border-transparent hover:border-white/10 transition-all"
                             >
                                 <div
-                                    className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${getFileColor(file.name)}`}
+                                    className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${getFileColor(file.display_name)}`}
                                 >
-                                    {getFileIcon(file.name, 24)}
+                                    {getFileIcon(file.display_name, 24)}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    {editingFile === file.name ? (
+                                    {editingFile === file.key ? (
                                         <div className="flex items-center gap-2 mb-1">
                                             <div className="flex items-center">
                                                 <input
@@ -613,7 +616,7 @@ export function Dashboard() {
                                             rel="noopener noreferrer"
                                             className="text-lg font-medium text-slate-200 group-hover:text-indigo-400 transition-colors block truncate"
                                         >
-                                            {file.display_name || file.name}
+                                            {file.display_name}
                                         </a>
                                     )}
 
@@ -641,7 +644,7 @@ export function Dashboard() {
                                     >
                                         <Link size={20} />
                                     </button>
-                                    {file.name.endsWith('.html') && (
+                                    {file.display_name.endsWith('.html') && (
                                         <button
                                             onClick={() => handleOpenEditor(file)}
                                             className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
@@ -658,7 +661,7 @@ export function Dashboard() {
                                         <Pencil size={20} />
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(file.name)}
+                                        onClick={() => handleDelete(file.key)}
                                         className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                                         title="삭제"
                                     >
@@ -672,16 +675,16 @@ export function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredFiles.map((file) => (
                             <div
-                                key={file.key || file.name}
+                                key={file.key}
                                 className="group glass-card hover:bg-slate-800/60 transition-all flex flex-col h-full border-t border-white/5"
                             >
                                 <div className="p-6 flex-1 flex flex-col items-center text-center">
                                     <div
-                                        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300 ${getFileColor(file.name)}`}
+                                        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300 ${getFileColor(file.display_name)}`}
                                     >
-                                        {getFileIcon(file.name, 32)}
+                                        {getFileIcon(file.display_name, 32)}
                                     </div>
-                                    {editingFile === file.name ? (
+                                    {editingFile === file.key ? (
                                         <div className="w-full mb-2 flex flex-col items-center gap-2">
                                             <div className="flex items-center justify-center w-full">
                                                 <input
@@ -725,7 +728,7 @@ export function Dashboard() {
                                             className="font-semibold text-white mb-2 line-clamp-2 w-full"
                                             title={file.display_name}
                                         >
-                                            {file.display_name || file.name}
+                                            {file.display_name}
                                         </h3>
                                     )}
                                     <p className="text-xs text-slate-500 bg-slate-900/50 px-2 py-1 rounded-full border border-white/5">{(file.size / 1024).toFixed(1)} KB</p>
@@ -750,7 +753,7 @@ export function Dashboard() {
                                         >
                                             <Link size={16} />
                                         </button>
-                                        {file.name.endsWith('.html') && (
+                                        {file.display_name.endsWith('.html') && (
                                             <button
                                                 onClick={() => handleOpenEditor(file)}
                                                 className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
@@ -767,7 +770,7 @@ export function Dashboard() {
                                             <Pencil size={16} />
                                         </button>
                                         <button
-                                            onClick={() => handleDelete(file.name)}
+                                            onClick={() => handleDelete(file.key)}
                                             className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
                                             title="삭제"
                                         >
