@@ -1,10 +1,12 @@
 import { parse } from 'cookie';
 import { load } from 'cheerio';
 import { verifyTurnstile } from '../../utils/turnstile';
+import { decryptPath } from '../../utils/crypto';
 
 interface Env {
     GEM_DECK: R2Bucket;
     TURNSTILE_SECRET_KEY?: string;
+    ENCRYPTION_SECRET: string;
 }
 
 /**
@@ -57,22 +59,43 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         const $ = load(htmlContent);
 
         const imagesToDelete: string[] = [];
+        const imagePromises: Promise<void>[] = [];
 
         $('img').each((_, elem) => {
             const src = $(elem).attr('src');
-            // src 형식: /api/file/image/user/uuid
-            if (src && src.startsWith('/api/file/image/')) {
-                const imageKey = src.replace('/api/file/', '');
-                // 사용자의 키인지 확인
-                if (imageKey.startsWith(`image/${email}/`)) {
-                    imagesToDelete.push(imageKey);
+
+            if (src && src.startsWith('/api/file/')) {
+                const pathOrHex = src.replace('/api/file/', '');
+
+                // Case 1: Legacy cleartext path (e.g., image/user/uuid)
+                if (pathOrHex.startsWith('image/')) {
+                    if (pathOrHex.startsWith(`image/${email}/`)) {
+                        imagesToDelete.push(pathOrHex);
+                    }
+                }
+                // Case 2: Encrypted hex path
+                else {
+                    imagePromises.push((async () => {
+                        try {
+                            const decryptedPath = await decryptPath(pathOrHex, env.ENCRYPTION_SECRET);
+                            if (decryptedPath && decryptedPath.startsWith(`image/${email}/`)) {
+                                imagesToDelete.push(decryptedPath);
+                            }
+                        } catch (e) {
+                            // ignore decryption errors
+                        }
+                    })());
                 }
             }
         });
 
+        await Promise.all(imagePromises);
+
         // 2. 이미지 삭제
         if (imagesToDelete.length > 0) {
-            await Promise.all(imagesToDelete.map((k) => env.GEM_DECK.delete(k)));
+            // 중복 제거
+            const uniqueImages = [...new Set(imagesToDelete)];
+            await Promise.all(uniqueImages.map((k) => env.GEM_DECK.delete(k)));
         }
     }
 

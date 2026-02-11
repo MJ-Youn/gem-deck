@@ -21,30 +21,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // 2. Legacy cleartext path array (e.g. ['docs', 'user', 'file.html'])
   
   const pathParam = params.path
-  let key = ''
+  let key: string | null = null
 
-  if (Array.isArray(pathParam)) {
-    // If it's a single long string, try to decrypt it first
-    if (pathParam.length === 1) {
-      const decrypted = await decryptPath(pathParam[0], env.ENCRYPTION_SECRET)
-      if (decrypted) {
-        key = decrypted
-      } else {
-        // Fallback: treat as cleartext (if we want to support legacy links or mixed mode)
-        // Or reject. User requested hiding username, so let's check.
-        // If it looks like 'docs/email/...' it might be legacy or direct access attempt.
-        // For now, let's allow direct access if decryption fails, OR force encryption?
-        // User wants to HIDE it. So if they try to access /api/file/docs/me/file, they can still guess.
-        // To strictly enforce, we should ONLY allow decrypted keys. 
-        // But for transition/dev, let's try decrypt, if fail, assume it's a direct key if valid?
-        // Let's assume if decrypt returns null, it's just the key (pathParam[0]).
-        key = pathParam[0]
-      }
-    } else {
-      key = pathParam.join('/')
-    }
-  } else {
-    key = pathParam as string
+  // 보안 강화: 암호화된 단일 경로만 허용 (IDOR 방지)
+  // Only allow encrypted paths to prevent unauthorized direct access.
+  if (Array.isArray(pathParam) && pathParam.length === 1) {
+    key = await decryptPath(pathParam[0], env.ENCRYPTION_SECRET)
+  }
+
+  if (!key) {
+    return new Response('Forbidden: Invalid or unencrypted path', { status: 403 })
   }
 
   const object = await env.GEM_DECK.get(key)
