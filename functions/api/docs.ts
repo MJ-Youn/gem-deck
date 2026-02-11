@@ -1,6 +1,6 @@
 import { parse } from 'cookie'
 
-import { encryptPath } from '../utils/crypto'
+import { encryptPath, getCryptoKey } from '../utils/crypto'
 
 interface Env {
   GEM_DECK: R2Bucket
@@ -44,9 +44,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   
   const list = await env.GEM_DECK.list({ prefix })
   
+  const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET);
+
   const files = await Promise.all(list.objects.map(async o => {
     // 전체 키를 암호화하여 URL을 불투명하게 만듭니다.
-    const encryptedPath = await encryptPath(o.key, env.ENCRYPTION_SECRET)
+    const encryptedPath = await encryptPath(o.key, cryptoKey)
     
     return {
       key: o.key, // 내부 로직(삭제 등)을 위해 실제 키 유지

@@ -16,7 +16,7 @@ interface Env {
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-02
  */
-import { decryptPath } from '../../utils/crypto';
+import { decryptPath, getCryptoKey } from '../../utils/crypto';
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -63,6 +63,8 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
       const imagesToDelete: string[] = [];
       const imagePromises: Promise<void>[] = [];
 
+      const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET);
+
       $('img').each((_, elem) => {
           const src = $(elem).attr('src');
           // src 형식: /api/file/<encryptedHex>
@@ -71,7 +73,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
               
               imagePromises.push((async () => {
                   try {
-                      const decryptedPath = await decryptPath(encryptedHex, env.ENCRYPTION_SECRET);
+                      const decryptedPath = await decryptPath(encryptedHex, cryptoKey);
                       if (decryptedPath) {
                           // 보안 검사: 이미지가 동일한 사용자에게 속하거나 합당한지 확인
                           // 관리자의 경우, 파일에 링크되어 있다면 삭제되어야 한다고 신뢰함.
