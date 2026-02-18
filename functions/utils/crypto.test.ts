@@ -44,3 +44,31 @@ test('decryptPath returns null for incorrect secret', async () => {
     const result = await decryptPath(encrypted, incorrectSecret);
     assert.strictEqual(result, null);
 });
+
+test('encryptPath and decryptPath work with CryptoKey input', async () => {
+    const path = '/some/secret/path';
+    const secret = 'another-secret';
+    const key = await getCryptoKey(secret);
+
+    const encrypted = await encryptPath(path, key);
+    assert.notStrictEqual(encrypted, path);
+
+    const decrypted = await decryptPath(encrypted, key);
+    assert.strictEqual(decrypted, path);
+});
+
+test('encryptPath and decryptPath interoperability between string secret and CryptoKey', async () => {
+    const path = '/interop/path';
+    const secret = 'interop-secret';
+    const key = await getCryptoKey(secret);
+
+    // Encrypt with Key, Decrypt with Secret
+    const encryptedWithKey = await encryptPath(path, key);
+    const decryptedWithSecret = await decryptPath(encryptedWithKey, secret);
+    assert.strictEqual(decryptedWithSecret, path);
+
+    // Encrypt with Secret, Decrypt with Key
+    const encryptedWithSecret = await encryptPath(path, secret);
+    const decryptedWithKey = await decryptPath(encryptedWithSecret, key);
+    assert.strictEqual(decryptedWithKey, path);
+});
