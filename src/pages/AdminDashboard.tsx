@@ -4,21 +4,7 @@ import { Toaster, toast } from 'sonner';
 import { Trash2, LogOut, Loader2, Search, Server, Cloud, Database, FileText, Image as ImageIcon, ExternalLink, ShieldCheck, Users, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
-
-type DocFile = {
-    key: string;
-    name: string;
-    display_name: string;
-    url?: string;
-    size: number;
-    uploaded: string;
-};
-
-type SystemStatus = {
-    google: boolean;
-    cloudflare: boolean;
-    r2: boolean;
-};
+import { DocFile, SystemStatus } from '../types';
 
 /**
  * 관리자 대시보드 페이지

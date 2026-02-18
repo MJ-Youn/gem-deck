@@ -6,17 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
 import { FileEditorModal } from '../components/FileEditorModal';
-
-type DocFile = {
-    key: string;
-    name: string;
-    display_name: string;
-    url?: string;
-    size: number;
-    uploaded: string;
-};
-
-type VerificationState = { type: 'upload'; files: File[] } | { type: 'delete'; filename: string } | null;
+import { DocFile, VerificationState } from '../types';
 
 /**
  * 대시보드 페이지 컴포넌트
