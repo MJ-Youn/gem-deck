@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
 import { Trash2, LogOut, Loader2, Search, Server, Cloud, Database, FileText, Image as ImageIcon, ExternalLink, ShieldCheck, Users, Copy } from 'lucide-react';
@@ -152,22 +152,26 @@ export function AdminDashboard() {
         }
     };
 
-    const users = Array.from(
-        new Set(
-            files.map((f) => {
-                const parts = f.key.split('/');
-                // key format: docs/email/filename
-                return parts.length > 2 ? parts[1] : 'Unknown';
-            }),
-        ),
-    ).sort();
+    const users = useMemo(() => {
+        return Array.from(
+            new Set(
+                files.map((f) => {
+                    const parts = f.key.split('/');
+                    // key format: docs/email/filename
+                    return parts.length > 2 ? parts[1] : 'Unknown';
+                }),
+            ),
+        ).sort();
+    }, [files]);
 
-    const filteredFiles = files.filter((f) => {
-        const matchesSearch = f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             f.key.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesUser = selectedUser === 'all' ? true : f.key.includes(`/${selectedUser}/`);
-        return matchesSearch && matchesUser;
-    });
+    const filteredFiles = useMemo(() => {
+        return files.filter((f) => {
+            const matchesSearch = f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                 f.key.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesUser = selectedUser === 'all' ? true : f.key.includes(`/${selectedUser}/`);
+            return matchesSearch && matchesUser;
+        });
+    }, [files, searchTerm, selectedUser]);
 
     /**
      * 시스템 상태 카드 컴포넌트
