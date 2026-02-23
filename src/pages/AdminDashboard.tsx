@@ -7,6 +7,40 @@ import { Footer } from '../components/Footer';
 import { DocFile, SystemStatus } from '../types';
 
 /**
+ * 시스템 상태 카드 컴포넌트
+ *
+ * @param props.title 서비스명
+ * @param props.status 연결 상태
+ * @param props.icon 아이콘 컴포넌트
+ * @param props.link 대시보드 링크
+ * @returns JSX.Element
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-03
+ */
+const StatusCard = ({ title, status, icon: Icon, link }: { title: string; status: boolean; icon: any; link: string }) => (
+    <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="glass-card p-6 flex items-center justify-between border border-white/5 bg-slate-900/40 hover:bg-slate-800/60 transition-colors group cursor-pointer"
+    >
+        <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl ${status ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                <Icon size={24} />
+            </div>
+            <div>
+                <h3 className="text-sm font-medium text-slate-400 group-hover:text-indigo-300 transition-colors flex items-center gap-2">
+                    {title}
+                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                </h3>
+                <p className={`text-lg font-bold ${status ? 'text-white' : 'text-red-400'}`}>{status ? 'Connected' : 'Disconnected'}</p>
+            </div>
+        </div>
+        <div className={`w-3 h-3 rounded-full ${status ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`}></div>
+    </a>
+);
+
+/**
  * 관리자 대시보드 페이지
  * 시스템 상태 모니터링 및 전체 파일 관리 기능을 제공합니다.
  *
@@ -172,40 +206,6 @@ export function AdminDashboard() {
             return matchesSearch && matchesUser;
         });
     }, [files, searchTerm, selectedUser]);
-
-    /**
-     * 시스템 상태 카드 컴포넌트
-     *
-     * @param props.title 서비스명
-     * @param props.status 연결 상태
-     * @param props.icon 아이콘 컴포넌트
-     * @param props.link 대시보드 링크
-     * @returns JSX.Element
-     * @author 윤명준 (MJ Yune)
-     * @since 2026-02-03
-     */
-    const StatusCard = ({ title, status, icon: Icon, link }: { title: string; status: boolean; icon: any; link: string }) => (
-        <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-card p-6 flex items-center justify-between border border-white/5 bg-slate-900/40 hover:bg-slate-800/60 transition-colors group cursor-pointer"
-        >
-            <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${status ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                    <Icon size={24} />
-                </div>
-                <div>
-                    <h3 className="text-sm font-medium text-slate-400 group-hover:text-indigo-300 transition-colors flex items-center gap-2">
-                        {title}
-                        <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </h3>
-                    <p className={`text-lg font-bold ${status ? 'text-white' : 'text-red-400'}`}>{status ? 'Connected' : 'Disconnected'}</p>
-                </div>
-            </div>
-            <div className={`w-3 h-3 rounded-full ${status ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`}></div>
-        </a>
-    );
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-slate-200 bg-slate-950">
