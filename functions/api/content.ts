@@ -82,7 +82,12 @@ async function handleGet(request: Request, env: Env, email: string, isAdmin: boo
   const content = await object.text();
 
   return new Response(content, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data:; sandbox allow-scripts allow-forms allow-popups;",
+    },
   });
 }
 
