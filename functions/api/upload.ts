@@ -77,20 +77,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     });
 
     // 3. 이미지 업로드
-    for (const img of imageFiles) {
-        if (usedImages.has(img.name)) {
-            const ext = img.name.split('.').pop();
-            const randomName = crypto.randomUUID() + '.' + ext;
-            const key = `image/${email}/${randomName}`;
+    await Promise.all(
+        imageFiles.map(async (img) => {
+            if (usedImages.has(img.name)) {
+                const ext = img.name.split('.').pop();
+                const randomName = crypto.randomUUID() + '.' + ext;
+                const key = `image/${email}/${randomName}`;
 
-            await env.GEM_DECK.put(key, await img.arrayBuffer(), {
-                httpMetadata: { contentType: img.type },
-            });
+                await env.GEM_DECK.put(key, await img.arrayBuffer(), {
+                    httpMetadata: { contentType: img.type },
+                });
 
-            const encryptedKey = await encryptPath(key, cryptoKey);
-            imageMapping.set(img.name, `/api/file/${encryptedKey}`);
-        }
-    }
+                const encryptedKey = await encryptPath(key, cryptoKey);
+                imageMapping.set(img.name, `/api/file/${encryptedKey}`);
+            }
+        }),
+    );
 
     // 4. 경로 재작성 (Rewrite)
     $('img').each((_, elem) => {
