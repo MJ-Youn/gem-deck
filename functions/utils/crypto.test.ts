@@ -6,8 +6,7 @@ test('getCryptoKey returns a valid CryptoKey object', async () => {
     const secret = 'my-secret';
     const key = await getCryptoKey(secret);
     assert.strictEqual(key.constructor.name, 'CryptoKey');
-    // @ts-ignore - key.algorithm is part of CryptoKey
-    assert.strictEqual(key.algorithm.name, 'AES-GCM');
+    assert.strictEqual((key.algorithm as KeyAlgorithm).name, 'AES-GCM');
     assert.strictEqual(key.extractable, true);
 });
 
