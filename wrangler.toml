@@ -12,3 +12,4 @@ bucket_name = "gem-deck"
 GOOGLE_CALLBACK_URL = "http://localhost:8788/auth/callback"
 ADMIN_EMAIL = "younmyungjun@gmail.com"
 ENCRYPTION_SECRET = "my-super-secret-key-change-this-in-prod"
+MAX_FILE_SIZE = "10485760" # 10MB (in bytes)

@@ -8,6 +8,7 @@ interface Env {
     GEM_DECK: R2Bucket;
     ENCRYPTION_SECRET: string;
     TURNSTILE_SECRET_KEY?: string;
+    MAX_FILE_SIZE?: string;
 }
 
 /**
@@ -54,6 +55,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!htmlFile) {
         return new Response(JSON.stringify({ error: 'No HTML' }), { status: 400 });
+    }
+
+    // Check file size limits
+    const maxFileSize = parseInt(env.MAX_FILE_SIZE || '10485760', 10);
+    if (htmlFile.size > maxFileSize) {
+        return new Response(JSON.stringify({ error: `File too large: ${htmlFile.name}` }), { status: 413 });
+    }
+    for (const img of imageFiles) {
+        if (img.size > maxFileSize) {
+            return new Response(JSON.stringify({ error: `File too large: ${img.name}` }), { status: 413 });
+        }
     }
 
     // 1. HTML 파싱
