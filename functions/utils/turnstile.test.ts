@@ -39,6 +39,7 @@ test('verifyTurnstile returns false on failed verification', async () => {
 
 test('verifyTurnstile returns false when fetch throws error', async () => {
     const originalFetch = global.fetch;
+    // @ts-ignore
     global.fetch = async () => {
         throw new Error('Network error');
     };
