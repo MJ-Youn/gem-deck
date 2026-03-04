@@ -9,8 +9,7 @@ test('verifyTurnstile returns false if token or secretKey is missing', async () 
 
 test('verifyTurnstile returns true on successful verification', async () => {
     const originalFetch = global.fetch;
-    // @ts-ignore
-    global.fetch = async () => ({
+    (global as any).fetch = async () => ({
         json: async () => ({ success: true })
     });
 
@@ -18,14 +17,13 @@ test('verifyTurnstile returns true on successful verification', async () => {
         const result = await verifyTurnstile('token', 'secret');
         assert.strictEqual(result, true);
     } finally {
-        global.fetch = originalFetch;
+        (global as any).fetch = originalFetch;
     }
 });
 
 test('verifyTurnstile returns false on failed verification', async () => {
     const originalFetch = global.fetch;
-    // @ts-ignore
-    global.fetch = async () => ({
+    (global as any).fetch = async () => ({
         json: async () => ({ success: false })
     });
 
@@ -33,14 +31,13 @@ test('verifyTurnstile returns false on failed verification', async () => {
         const result = await verifyTurnstile('token', 'secret');
         assert.strictEqual(result, false);
     } finally {
-        global.fetch = originalFetch;
+        (global as any).fetch = originalFetch;
     }
 });
 
 test('verifyTurnstile returns false when fetch throws error', async () => {
     const originalFetch = global.fetch;
-    // @ts-ignore
-    global.fetch = async () => {
+    (global as any).fetch = async () => {
         throw new Error('Network error');
     };
 
@@ -51,20 +48,19 @@ test('verifyTurnstile returns false when fetch throws error', async () => {
         const result = await verifyTurnstile('token', 'secret');
         assert.strictEqual(result, false);
     } finally {
-        global.fetch = originalFetch;
+        (global as any).fetch = originalFetch;
         console.error = originalConsoleError;
     }
 });
 
 test('verifyTurnstile sends correct data in fetch', async () => {
     const originalFetch = global.fetch;
-    let capturedBody: FormData | null = null;
+    let capturedBody: any = null;
     let capturedUrl: string | null = null;
 
-    // @ts-ignore
-    global.fetch = async (url, options) => {
+    (global as any).fetch = async (url: any, options: any) => {
         capturedUrl = url.toString();
-        capturedBody = options.body as FormData;
+        capturedBody = options.body;
         return {
             json: async () => ({ success: true })
         };
@@ -78,6 +74,6 @@ test('verifyTurnstile sends correct data in fetch', async () => {
         assert.strictEqual(capturedBody?.get('secret'), 'test-secret');
         assert.strictEqual(capturedBody?.get('remoteip'), '1.2.3.4');
     } finally {
-        global.fetch = originalFetch;
+        (global as any).fetch = originalFetch;
     }
 });
