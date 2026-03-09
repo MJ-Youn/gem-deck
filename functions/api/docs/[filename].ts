@@ -2,6 +2,7 @@ import { parse } from 'cookie';
 import { load } from 'cheerio';
 import { verifyTurnstile } from '../../utils/turnstile';
 import { decryptPath } from '../../utils/crypto';
+import { sanitizeFilename } from '../../utils/path';
 
 interface Env {
     GEM_DECK: R2Bucket;
@@ -149,8 +150,14 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         return new Response('Missing name', { status: 400 });
     }
 
+    // Sanitize the filename to prevent path traversal
+    const sanitizedBase = sanitizeFilename(newNameWithoutExt);
+    if (!sanitizedBase) {
+        return new Response('Invalid name', { status: 400 });
+    }
+
     // 새 이름에 .html 확장자 보장
-    const newName = newNameWithoutExt.endsWith('.html') ? newNameWithoutExt : `${newNameWithoutExt}.html`;
+    const newName = sanitizedBase.endsWith('.html') ? sanitizedBase : `${sanitizedBase}.html`;
 
     const oldKey = `docs/${email}/${filename}`;
     const newKey = `docs/${email}/${newName}`;

@@ -3,6 +3,7 @@ import { load } from 'cheerio';
 
 import { encryptPath, getCryptoKey } from '../utils/crypto';
 import { verifyTurnstile } from '../utils/turnstile';
+import { sanitizeFilename } from '../utils/path';
 
 interface Env {
     GEM_DECK: R2Bucket;
@@ -120,7 +121,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // 5. HTML 파일 업로드
     // 목록 API는 전체 키를 반환하지만, UI는 단순 이름을 기대할 수 있음.
     // 현재 구조상 전체 키 사용.
-    const htmlKey = `docs/${email}/${htmlFile.name}`;
+    const sanitizedName = sanitizeFilename(htmlFile.name);
+    const htmlKey = `docs/${email}/${sanitizedName}`;
     await env.GEM_DECK.put(htmlKey, $.html(), {
         httpMetadata: { contentType: 'text/html' },
     });
