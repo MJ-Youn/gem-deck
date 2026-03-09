@@ -91,9 +91,10 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
       await Promise.all(imagePromises);
 
-      // 이미지 삭제
+      // 이미지 삭제 (Bulk Delete)
       if (imagesToDelete.length > 0) {
-          await Promise.all(imagesToDelete.map(k => env.GEM_DECK.delete(k)));
+          const uniqueImages = [...new Set(imagesToDelete)];
+          await env.GEM_DECK.delete(uniqueImages);
       }
   }
 
