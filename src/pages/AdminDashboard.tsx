@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Trash2, LogOut, Loader2, Search, Server, Cloud, Database, FileText, Image as ImageIcon, ExternalLink, ShieldCheck, Users, Copy } from 'lucide-react';
+import { Trash2, LogOut, Loader2, Search, Server, Cloud, Database, FileText, Image as ImageIcon, ExternalLink, ShieldCheck, Users, Copy, LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { DocFile, SystemStatus } from '../types';
@@ -17,7 +17,7 @@ import { DocFile, SystemStatus } from '../types';
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-03
  */
-const StatusCard = ({ title, status, icon: Icon, link }: { title: string; status: boolean; icon: any; link: string }) => (
+const StatusCard = ({ title, status, icon: Icon, link }: { title: string; status: boolean; icon: LucideIcon; link: string }) => (
     <a
         href={link}
         target="_blank"
