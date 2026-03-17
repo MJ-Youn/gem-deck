@@ -95,8 +95,16 @@ export function Dashboard() {
      * @since 2026-02-03
      */
     const executeUpload = async (files: File[], token: string) => {
-        const htmlFile = files.find((f) => f.name.endsWith('.html'));
-        const imageFiles = files.filter((f) => !f.name.endsWith('.html'));
+        let htmlFile: File | undefined;
+        const images: File[] = [];
+
+        for (const file of files) {
+            if (file.name.endsWith('.html')) {
+                if (!htmlFile) htmlFile = file;
+            } else {
+                images.push(file);
+            }
+        }
 
         if (!htmlFile) {
             toast.error('HTML 파일을 포함해야 합니다.');
@@ -106,7 +114,9 @@ export function Dashboard() {
         setUploading(true);
         const formData = new FormData();
         formData.append('html', htmlFile);
-        imageFiles.forEach((img) => formData.append('images', img));
+        for (const img of images) {
+            formData.append('images', img);
+        }
         formData.append('cf-turnstile-response', token);
 
         try {
