@@ -36,9 +36,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     name = sessionData.name
     picture = sessionData.picture
   } catch {
-    // Fallback for legacy plain text email cookies
-    email = cookieValue
-    name = email.split('@')[0]
+    // Insecure fallback removed
   }
 
   if (!email) {

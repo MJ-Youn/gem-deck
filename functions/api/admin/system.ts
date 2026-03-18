@@ -30,7 +30,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const sessionHelper = JSON.parse(cookieValue);
     email = sessionHelper.email;
   } catch {
-    email = cookieValue;
+    // Insecure fallback removed
   }
 
   if (email !== env.ADMIN_EMAIL) {

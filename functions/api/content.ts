@@ -29,7 +29,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const sessionHelper = JSON.parse(cookieValue);
     email = sessionHelper.email;
   } catch {
-    email = cookieValue;
+    // Insecure fallback removed
   }
 
   if (!email) {
