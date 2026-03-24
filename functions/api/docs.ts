@@ -1,6 +1,6 @@
 import { parse } from 'cookie'
 
-import { encryptPath, getCryptoKey } from '../utils/crypto'
+import { encryptPath, getCryptoKey, verifySession } from '../utils/crypto'
 
 interface Env {
   GEM_DECK: R2Bucket
@@ -23,14 +23,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const cookieValue = cookies['auth_session']
   if (!cookieValue) return new Response('Unauthorized', { status: 401 })
 
-  let email = ''
-  try {
-    const sessionHelper = JSON.parse(cookieValue)
-    email = sessionHelper.email
-  } catch {
-    // Insecure fallback removed
-  }
+  const session = await verifySession<{ email: string }>(cookieValue, env.ENCRYPTION_SECRET)
+  if (!session) return new Response('Unauthorized', { status: 401 })
 
+  const email = session.email
   if (!email) return new Response('Unauthorized', { status: 401 })
 
   // Check for 'scope' query parameter

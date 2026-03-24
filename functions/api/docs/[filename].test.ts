@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { onRequestDelete } from './[filename].ts';
-import { encryptPath } from '../../utils/crypto.ts';
+import { encryptPath, signSession } from '../../utils/crypto.ts';
 
 test('onRequestDelete (user) deletes images and html file using multiple calls (current)', async () => {
     const secret = 'test-secret';
@@ -32,10 +32,12 @@ test('onRequestDelete (user) deletes images and html file using multiple calls (
         }
     };
 
+    const session = await signSession({ email }, secret);
+
     const request = new Request(`https://example.com/api/docs/${filename}`, {
         method: 'DELETE',
         headers: {
-            'Cookie': `auth_session={"email":"${email}"}`,
+            'Cookie': `auth_session=${session}`,
             'X-Turnstile-Token': 'mock-token'
         }
     });

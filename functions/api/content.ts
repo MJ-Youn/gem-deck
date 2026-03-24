@@ -1,8 +1,10 @@
 import { parse } from 'cookie';
+import { verifySession } from '../utils/crypto';
 
 interface Env {
   GEM_DECK: R2Bucket;
   ADMIN_EMAIL: string;
+  ENCRYPTION_SECRET: string;
 }
 
 /**
@@ -24,14 +26,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  let email = '';
-  try {
-    const sessionHelper = JSON.parse(cookieValue);
-    email = sessionHelper.email;
-  } catch {
-    // Insecure fallback removed
+  const session = await verifySession<{ email: string }>(cookieValue, env.ENCRYPTION_SECRET);
+  if (!session) {
+    return new Response('Unauthorized', { status: 401 });
   }
 
+  const email = session.email;
   if (!email) {
     return new Response('Unauthorized', { status: 401 });
   }

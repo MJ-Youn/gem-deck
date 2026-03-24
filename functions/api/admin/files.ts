@@ -16,7 +16,7 @@ interface Env {
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-02
  */
-import { decryptPath, getCryptoKey } from '../../utils/crypto';
+import { decryptPath, getCryptoKey, verifySession } from '../../utils/crypto';
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -28,15 +28,10 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  let email = '';
-  try {
-    const sessionHelper = JSON.parse(cookieValue);
-    email = sessionHelper.email;
-  } catch {
-    // Insecure fallback removed
-  }
+  const session = await verifySession<{ email: string }>(cookieValue, env.ENCRYPTION_SECRET);
+  const email = session?.email || '';
 
-  if (email !== env.ADMIN_EMAIL) {
+  if (!email || email !== env.ADMIN_EMAIL) {
     return new Response('Forbidden', { status: 403 });
   }
 
