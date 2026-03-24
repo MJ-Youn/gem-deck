@@ -349,14 +349,13 @@ export function Dashboard() {
     /**
      * 파일 확장자에 따른 아이콘을 반환합니다.
      *
-     * @param filename 파일명
+     * @param ext 파일 확장자
      * @param size 아이콘 크기
      * @returns JSX.Element 아이콘 컴포넌트
      * @author 윤명준 (MJ Yune)
      * @since 2026-02-03
      */
-    const getFileIcon = (filename: string, size: number) => {
-        const ext = filename.split('.').pop()?.toLowerCase();
+    const getFileIcon = (ext: string | undefined, size: number) => {
         switch (ext) {
             case 'html': return <FileCode size={size} />;
             case 'pdf': return <FileText size={size} />;
@@ -375,13 +374,12 @@ export function Dashboard() {
     /**
      * 파일 확장자에 따른 배경 색상 클래스를 반환합니다.
      *
-     * @param filename 파일명
+     * @param ext 파일 확장자
      * @returns string Tailwind CSS 클래스 문자열
      * @author 윤명준 (MJ Yune)
      * @since 2026-02-03
      */
-    const getFileColor = (filename: string) => {
-        const ext = filename.split('.').pop()?.toLowerCase();
+    const getFileColor = (ext: string | undefined) => {
         switch (ext) {
             case 'html': return 'bg-gradient-to-br from-orange-500/10 to-amber-500/10 text-orange-400 ring-1 ring-orange-500/20 shadow-lg shadow-orange-500/10';
             case 'pdf': return 'bg-gradient-to-br from-red-500/10 to-rose-500/10 text-red-400 ring-1 ring-red-500/20 shadow-lg shadow-red-500/10';
@@ -544,16 +542,18 @@ export function Dashboard() {
                     )
                 ) : viewMode === 'list' ? (
                     <div className="space-y-3">
-                        {filteredFiles.map((file) => (
-                            <div
-                                key={file.key}
-                                className="group glass-card p-4 flex items-center gap-5 hover:bg-slate-800/40 border-transparent hover:border-white/10 transition-all"
-                            >
+                        {filteredFiles.map((file) => {
+                            const ext = file.display_name.split('.').pop()?.toLowerCase();
+                            return (
                                 <div
-                                    className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${getFileColor(file.display_name)}`}
+                                    key={file.key}
+                                    className="group glass-card p-4 flex items-center gap-5 hover:bg-slate-800/40 border-transparent hover:border-white/10 transition-all"
                                 >
-                                    {getFileIcon(file.display_name, 24)}
-                                </div>
+                                    <div
+                                        className={`w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center ${getFileColor(ext)}`}
+                                    >
+                                        {getFileIcon(ext, 24)}
+                                    </div>
 
                                 <div className="flex-1 min-w-0">
                                     {editingFile === file.key ? (
@@ -621,7 +621,7 @@ export function Dashboard() {
                                     >
                                         <Link size={20} />
                                     </button>
-                                    {file.display_name.endsWith('.html') && (
+                                    {ext === 'html' && (
                                         <button
                                             onClick={() => handleOpenEditor(file)}
                                             className="p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
@@ -645,22 +645,24 @@ export function Dashboard() {
                                         <Trash2 size={20} />
                                     </button>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredFiles.map((file) => (
-                            <div
-                                key={file.key}
-                                className="group glass-card hover:bg-slate-800/60 transition-all flex flex-col h-full border-t border-white/5"
-                            >
-                                <div className="p-6 flex-1 flex flex-col items-center text-center">
-                                    <div
-                                        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300 ${getFileColor(file.display_name)}`}
-                                    >
-                                        {getFileIcon(file.display_name, 32)}
-                                    </div>
+                        {filteredFiles.map((file) => {
+                            const ext = file.display_name.split('.').pop()?.toLowerCase();
+                            return (
+                                <div
+                                    key={file.key}
+                                    className="group glass-card hover:bg-slate-800/60 transition-all flex flex-col h-full border-t border-white/5"
+                                >
+                                    <div className="p-6 flex-1 flex flex-col items-center text-center">
+                                        <div
+                                            className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300 ${getFileColor(ext)}`}
+                                        >
+                                            {getFileIcon(ext, 32)}
+                                        </div>
                                     {editingFile === file.key ? (
                                         <div className="w-full mb-2 flex flex-col items-center gap-2">
                                             <div className="flex items-center justify-center w-full">
@@ -730,7 +732,7 @@ export function Dashboard() {
                                         >
                                             <Link size={16} />
                                         </button>
-                                        {file.display_name.endsWith('.html') && (
+                                        {ext === 'html' && (
                                             <button
                                                 onClick={() => handleOpenEditor(file)}
                                                 className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-md transition-colors"
@@ -755,8 +757,8 @@ export function Dashboard() {
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </main>
