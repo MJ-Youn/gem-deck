@@ -1,7 +1,9 @@
 import { parse } from 'cookie'
+import { verifySession } from '../utils/crypto'
 
 interface Env {
   ADMIN_EMAIL: string
+  ENCRYPTION_SECRET: string
 }
 
 /**
@@ -25,19 +27,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     })
   }
 
-  let email = ''
-  let name = ''
-  let picture = ''
+  const sessionData = await verifySession<{ email: string; name: string; picture: string }>(
+    cookieValue,
+    env.ENCRYPTION_SECRET
+  )
 
-  try {
-    // Try parsing as JSON first
-    const sessionData = JSON.parse(cookieValue)
-    email = sessionData.email
-    name = sessionData.name
-    picture = sessionData.picture
-  } catch {
-    // Insecure fallback removed
+  if (!sessionData) {
+    return new Response(JSON.stringify({ authenticated: false }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
+
+  const { email, name, picture } = sessionData
 
   if (!email) {
     return new Response(JSON.stringify({ authenticated: false }), {

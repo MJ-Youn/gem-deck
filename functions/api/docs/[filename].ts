@@ -1,7 +1,7 @@
 import { parse } from 'cookie';
 import { load } from 'cheerio';
 import { verifyTurnstile } from '../../utils/turnstile';
-import { decryptPath } from '../../utils/crypto';
+import { decryptPath, verifySession } from '../../utils/crypto';
 import { sanitizeFilename } from '../../utils/path';
 
 interface Env {
@@ -37,14 +37,12 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         return new Response('Unauthorized', { status: 401 });
     }
 
-    let email = '';
-    try {
-        const sessionHelper = JSON.parse(cookieValue);
-        email = sessionHelper.email;
-    } catch {
-        // Insecure fallback removed
+    const session = await verifySession<{ email: string }>(cookieValue, env.ENCRYPTION_SECRET);
+    if (!session) {
+        return new Response('Unauthorized', { status: 401 });
     }
 
+    const email = session.email;
     if (!email) {
         return new Response('Unauthorized', { status: 401 });
     }
@@ -126,14 +124,12 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         return new Response('Unauthorized', { status: 401 });
     }
 
-    let email = '';
-    try {
-        const sessionHelper = JSON.parse(cookieValue);
-        email = sessionHelper.email;
-    } catch {
-        // Insecure fallback removed
+    const session = await verifySession<{ email: string }>(cookieValue, env.ENCRYPTION_SECRET);
+    if (!session) {
+        return new Response('Unauthorized', { status: 401 });
     }
 
+    const email = session.email;
     if (!email) {
         return new Response('Unauthorized', { status: 401 });
     }

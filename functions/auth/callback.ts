@@ -1,9 +1,11 @@
 import { serialize } from 'cookie';
+import { signSession } from '../utils/crypto';
 
 interface Env {
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
     GOOGLE_CALLBACK_URL: string;
+    ENCRYPTION_SECRET: string;
 }
 
 /**
@@ -50,11 +52,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const userData = (await userResponse.json()) as any;
 
     // Set Cookie
-    const sessionData = JSON.stringify({
+    const sessionData = await signSession({
         email: userData.email,
         name: userData.name,
         picture: userData.picture,
-    });
+    }, env.ENCRYPTION_SECRET);
 
     const cookie = serialize('auth_session', sessionData, {
         httpOnly: true,

@@ -33,14 +33,6 @@ export async function getCryptoKey(secret: string): Promise<CryptoKey> {
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-03
  */
-/**
- * ArrayBuffer를 16진수 문자열로 변환합니다.
- *
- * @param buffer 변환할 버퍼
- * @returns 16진수 문자열
- * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
- */
 function buf2hex(buffer: ArrayBuffer) {
     return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, '0')).join('');
 }
@@ -53,16 +45,72 @@ function buf2hex(buffer: ArrayBuffer) {
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-03
  */
-/**
- * 16진수 문자열을 Uint8Array로 변환합니다.
- *
- * @param hex 16진수 문자열
- * @returns 변환된 Uint8Array
- * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
- */
 function hex2buf(hex: string) {
     return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
+}
+
+/**
+ * 세션 데이터를 서명합니다. (HMAC-SHA256)
+ *
+ * @param payload 서명할 데이터
+ * @param secret 비밀 키
+ * @returns 서명된 세션 문자열 (hexPayload.hexSignature)
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-14
+ */
+export async function signSession(payload: any, secret: string): Promise<string> {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(secret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+    );
+
+    const payloadStr = JSON.stringify(payload);
+    const data = enc.encode(payloadStr);
+    const signature = await crypto.subtle.sign('HMAC', key, data);
+
+    return `${buf2hex(data.buffer)}.${buf2hex(signature)}`;
+}
+
+/**
+ * 서명된 세션 문자열을 검증하고 데이터를 복구합니다.
+ *
+ * @param token 서명된 세션 문자열
+ * @param secret 비밀 키
+ * @returns 복구된 데이터 또는 실패 시 null
+ * @author 윤명준 (MJ Yune)
+ * @since 2026-02-14
+ */
+export async function verifySession<T>(token: string, secret: string): Promise<T | null> {
+    try {
+        const [hexPayload, hexSignature] = token.split('.');
+        if (!hexPayload || !hexSignature) return null;
+
+        const payloadBuf = hex2buf(hexPayload);
+        const payloadStr = new TextDecoder().decode(payloadBuf);
+        const payload = JSON.parse(payloadStr) as T;
+
+        const enc = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+            'raw',
+            enc.encode(secret),
+            { name: 'HMAC', hash: 'SHA-256' },
+            false,
+            ['verify']
+        );
+
+        const signature = hex2buf(hexSignature);
+        const data = enc.encode(payloadStr);
+
+        const isValid = await crypto.subtle.verify('HMAC', key, signature, data);
+
+        return isValid ? payload : null;
+    } catch {
+        return null;
+    }
 }
 
 /**
