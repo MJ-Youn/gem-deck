@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "deploy": "npm run build && wrangler pages deploy dist",
     "preview": "vite preview",
-    "test": "node --test --experimental-strip-types \"functions/**/*.test.ts\""
+    "test": "node --test --experimental-strip-types \"functions/**/*.test.ts\" \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
