@@ -645,6 +645,7 @@ export function Dashboard() {
                                         <Trash2 size={20} />
                                     </button>
                                 </div>
+                                </div>
                             );
                         })}
                     </div>
@@ -756,6 +757,7 @@ export function Dashboard() {
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+                                </div>
                                 </div>
                             );
                         })}
