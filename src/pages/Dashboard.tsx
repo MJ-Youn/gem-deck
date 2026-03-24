@@ -76,7 +76,7 @@ export function Dashboard() {
         try {
             const { data } = (await axios.get('/api/docs')) as { data: { files: DocFile[] } };
             setFiles(data.files);
-        } catch (e) {
+        } catch {
             toast.error('파일 목록을 불러오지 못했습니다.');
         } finally {
             setLoading(false);
@@ -129,7 +129,7 @@ export function Dashboard() {
                 description: `${result.uploadedImages}개의 이미지와 함께 변환되었습니다.`,
             });
             fetchFiles();
-        } catch (e) {
+        } catch {
             toast.error('업로드 실패');
         } finally {
             setUploading(false);

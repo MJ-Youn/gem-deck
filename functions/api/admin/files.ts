@@ -82,7 +82,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                               imagesToDelete.push(decryptedPath);
                           }
                       }
-                  } catch (e) {
+                  } catch {
                       // 복호화 오류 무시
                   }
               })());
