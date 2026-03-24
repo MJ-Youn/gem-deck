@@ -29,8 +29,8 @@ export async function verifyTurnstile(token: string, secretKey: string, ip?: str
 
     const outcome = (await result.json()) as { success: boolean };
     return outcome.success;
-  } catch (e) {
-    console.error('Turnstile verification error:', e);
+  } catch (err) {
+    console.error('Turnstile verification error:', err);
     return false;
   }
 }

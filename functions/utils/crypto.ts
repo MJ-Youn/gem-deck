@@ -106,7 +106,7 @@ export async function decryptPath(encryptedHex: string, secretOrKey: string | Cr
         const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
 
         return new TextDecoder().decode(decrypted);
-    } catch (e) {
+    } catch {
         return null;
     }
 }

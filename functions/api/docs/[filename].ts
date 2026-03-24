@@ -82,7 +82,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                             if (decryptedPath && decryptedPath.startsWith(`image/${email}/`)) {
                                 imagesToDelete.push(decryptedPath);
                             }
-                        } catch (e) {
+                        } catch {
                             // ignore decryption errors
                         }
                     })());

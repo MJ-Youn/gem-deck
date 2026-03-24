@@ -67,7 +67,7 @@ export function FileEditorModal({ isOpen, onClose, fileKey, fileName, onSave }: 
             });
             setContent(response.data);
             setOriginalContent(response.data);
-        } catch (e) {
+        } catch {
             toast.error('파일 내용을 불러오지 못했습니다.');
             onClose();
         } finally {
@@ -93,7 +93,7 @@ export function FileEditorModal({ isOpen, onClose, fileKey, fileName, onSave }: 
             toast.success('파일이 저장되었습니다.');
             setOriginalContent(content);
             if (onSave) onSave();
-        } catch (e) {
+        } catch {
             toast.error('저장에 실패했습니다.');
         } finally {
             setSaving(false);

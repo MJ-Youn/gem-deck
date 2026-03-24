@@ -51,8 +51,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // 1개의 객체 목록 조회는 저렴/무료에 가까움
     await env.GEM_DECK.list({ limit: 1 });
     r2Status = true;
-  } catch (e) {
-    console.error('R2 Check Failed:', e);
+  } catch (err) {
+    console.error('R2 Check Failed:', err);
     r2Status = false;
   }
 

@@ -127,7 +127,7 @@ export function AdminDashboard() {
             // 업데이트: 이제 관리자라도 모든 파일을 보려면 scope=all 파라미터를 명시적으로 강제합니다.
             const { data } = (await axios.get('/api/docs?scope=all')) as { data: { files: DocFile[] } };
             setFiles(data.files);
-        } catch (e) {
+        } catch {
             toast.error('파일 목록을 불러오지 못했습니다.');
         } finally {
             setLoading(false);
@@ -156,7 +156,7 @@ export function AdminDashboard() {
             });
             toast.success('파일이 삭제되었습니다.');
             setFiles((prev) => prev.filter((f) => f.key !== key));
-        } catch (e) {
+        } catch {
             toast.error('삭제 실패');
         } finally {
             setDeleting(null);
