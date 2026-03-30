@@ -1,7 +1,7 @@
 import { parse } from 'cookie';
 import { load } from 'cheerio';
 import { verifyTurnstile } from '../../utils/turnstile';
-import { decryptPath, verifySession } from '../../utils/crypto';
+import { decryptPath, verifySession, getCryptoKey } from '../../utils/crypto';
 import { sanitizeFilename } from '../../utils/path';
 
 interface Env {
@@ -60,6 +60,15 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         const imagesToDelete: string[] = [];
         const imagePromises: Promise<void>[] = [];
 
+        // Pre-derive key for decryption loop
+        let cryptoKeyPromise: Promise<CryptoKey> | null = null;
+        const getSharedKey = () => {
+            if (!cryptoKeyPromise) {
+                cryptoKeyPromise = getCryptoKey(env.ENCRYPTION_SECRET);
+            }
+            return cryptoKeyPromise;
+        };
+
         $('img').each((_, elem) => {
             const src = $(elem).attr('src');
 
@@ -76,7 +85,8 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                 else {
                     imagePromises.push((async () => {
                         try {
-                            const decryptedPath = await decryptPath(pathOrHex, env.ENCRYPTION_SECRET);
+                            const key = await getSharedKey();
+                            const decryptedPath = await decryptPath(pathOrHex, key);
                             if (decryptedPath && decryptedPath.startsWith(`image/${email}/`)) {
                                 imagesToDelete.push(decryptedPath);
                             }
