@@ -1,4 +1,4 @@
-import { decryptPath } from '../../utils/crypto'
+import { decryptPath } from '../../utils/crypto.ts'
 
 interface Env {
   GEM_DECK: R2Bucket
