@@ -778,11 +778,17 @@ export function Dashboard() {
                         </p>
 
                         <div className="flex justify-center mb-6">
-                            <Turnstile
-                                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                                onVerify={handleVerificationSuccess}
-                                theme="dark"
-                            />
+                            {import.meta.env.VITE_TURNSTILE_SITE_KEY ? (
+                                <Turnstile
+                                    sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                                    onVerify={handleVerificationSuccess}
+                                    theme="dark"
+                                />
+                            ) : (
+                                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                                    Configuration Error: Turnstile Site Key is missing.
+                                </div>
+                            )}
                         </div>
 
                         <button

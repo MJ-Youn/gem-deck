@@ -54,7 +54,8 @@ test('onRequestDelete (user) deletes images and html file using multiple calls (
             params: { filename },
             env: {
                 GEM_DECK: mockR2,
-                ENCRYPTION_SECRET: secret
+                ENCRYPTION_SECRET: secret,
+                TURNSTILE_SECRET_KEY: 'test-turnstile-secret'
             }
         } as any;
 
