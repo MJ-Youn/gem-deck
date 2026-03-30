@@ -17,8 +17,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   // Verify Turnstile Token
-  // Use env.TURNSTILE_SECRET_KEY if available, otherwise use Test Secret Key
-  const secretKey = env.TURNSTILE_SECRET_KEY || '1x00000000000000000000AA'
+  const secretKey = env.TURNSTILE_SECRET_KEY || ''
   
   const formData = new FormData()
   formData.append('secret', secretKey)
