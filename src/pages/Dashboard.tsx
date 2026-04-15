@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
 import { FileEditorModal } from '../components/FileEditorModal';
-import { DocFile, VerificationState } from '../types';
+import { DocFile, VerificationState, AuthResponse, UploadResponse } from '../types';
 import { handleCopyLink } from '../utils/clipboard';
 
 /**
@@ -53,9 +53,9 @@ export function Dashboard() {
      */
     const checkAuth = async () => {
         try {
-            const { data } = (await axios.get('/auth/me')) as { data: any };
-            setUserName(data.name || data.email.split('@')[0]);
-            setUserPicture(data.picture);
+            const { data } = await axios.get<AuthResponse>('/auth/me');
+            setUserName(data.name || data.email?.split('@')[0] || '');
+            setUserPicture(data.picture || '');
             setIsAdmin(data.isAdmin || false);
             if (!data.authenticated) {
                 navigate('/');
@@ -121,9 +121,9 @@ export function Dashboard() {
         formData.append('cf-turnstile-response', token);
 
         try {
-            const { data: result } = (await axios.post('/api/upload', formData, {
+            const { data: result } = await axios.post<UploadResponse>('/api/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
-            })) as { data: any };
+            });
 
             toast.success('업로드 완료', {
                 description: `${result.uploadedImages}개의 이미지와 함께 변환되었습니다.`,
