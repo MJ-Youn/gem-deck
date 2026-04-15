@@ -17,4 +17,17 @@ export type SystemStatus = {
     r2: boolean;
 };
 
+export type AuthResponse = {
+    authenticated: boolean;
+    email?: string;
+    name?: string;
+    picture?: string;
+    isAdmin?: boolean;
+};
+
+export type UploadResponse = {
+    success: boolean;
+    uploadedImages: number;
+};
+
 export type VerificationState = { type: 'upload'; files: File[] } | { type: 'delete'; filename: string } | null;

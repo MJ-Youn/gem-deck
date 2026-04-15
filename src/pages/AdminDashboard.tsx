@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner';
 import { Trash2, LogOut, Loader2, Search, Server, Cloud, Database, FileText, Image as ImageIcon, ExternalLink, ShieldCheck, Users, Copy, LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
-import { DocFile, SystemStatus } from '../types';
+import { DocFile, SystemStatus, AuthResponse } from '../types';
 import { handleCopyLink } from '../utils/clipboard';
 
 /**
@@ -73,7 +73,7 @@ export function AdminDashboard() {
     const checkAuthAndFetchData = async () => {
         try {
             // 1. Check Auth & Admin Status
-            const { data: authData } = (await axios.get('/auth/me')) as { data: any };
+            const { data: authData } = await axios.get<AuthResponse>('/auth/me');
             if (!authData.authenticated || !authData.isAdmin) {
                 toast.error('접근 권한이 없습니다.');
                 navigate('/dashboard');
