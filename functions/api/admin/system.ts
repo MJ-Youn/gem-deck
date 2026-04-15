@@ -1,4 +1,4 @@
-import { parse } from 'cookie';
+import { parse } from '../../utils/cookie.ts';
 import { verifySession } from '../../utils/crypto';
 
 interface Env {

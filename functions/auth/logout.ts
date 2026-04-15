@@ -1,4 +1,4 @@
-import { serialize } from 'cookie'
+import { serialize } from '../utils/cookie.ts'
 
 /**
  * 로그아웃 요청을 처리합니다.

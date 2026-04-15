@@ -167,8 +167,8 @@ export function AdminDashboard() {
 
     const users = useMemo(() => {
         const userSet = new Set<string>();
-        for (const f of files) {
-            const key = f.key;
+        for (const file of files) {
+            const key = file.key;
             const firstSlash = key.indexOf('/');
             if (firstSlash !== -1) {
                 const secondSlash = key.indexOf('/', firstSlash + 1);

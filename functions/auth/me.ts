@@ -1,5 +1,5 @@
-import { parse } from 'cookie'
-import { verifySession } from '../utils/crypto'
+import { parse } from '../utils/cookie.ts'
+import { verifySession } from '../utils/crypto.ts'
 
 interface Env {
   ADMIN_EMAIL: string

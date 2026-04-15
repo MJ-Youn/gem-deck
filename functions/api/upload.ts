@@ -1,4 +1,4 @@
-import { parse } from 'cookie';
+import { parse } from '../utils/cookie.ts';
 import { load } from 'cheerio';
 
 import { encryptPath, getCryptoKey, verifySession } from '../utils/crypto';
