@@ -166,15 +166,20 @@ export function AdminDashboard() {
 
 
     const users = useMemo(() => {
-        return Array.from(
-            new Set(
-                files.map((f) => {
-                    const parts = f.key.split('/');
-                    // key format: docs/email/filename
-                    return parts.length > 2 ? parts[1] : 'Unknown';
-                }),
-            ),
-        ).sort();
+        const userSet = new Set<string>();
+        for (const file of files) {
+            const key = file.key;
+            const firstSlash = key.indexOf('/');
+            if (firstSlash !== -1) {
+                const secondSlash = key.indexOf('/', firstSlash + 1);
+                if (secondSlash !== -1) {
+                    userSet.add(key.substring(firstSlash + 1, secondSlash));
+                    continue;
+                }
+            }
+            userSet.add('Unknown');
+        }
+        return Array.from(userSet).sort();
     }, [files]);
 
     const filteredFiles = useMemo(() => {
