@@ -183,10 +183,15 @@ export function AdminDashboard() {
     }, [files]);
 
     const filteredFiles = useMemo(() => {
+        if (!searchTerm && selectedUser === 'all') return files;
+
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        const userPattern = selectedUser === 'all' ? null : `/${selectedUser}/`;
+
         return files.filter((f) => {
-            const matchesSearch = f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                 f.key.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesUser = selectedUser === 'all' ? true : f.key.includes(`/${selectedUser}/`);
+            const matchesSearch =
+                !lowerSearchTerm || f.display_name.toLowerCase().includes(lowerSearchTerm) || f.key.toLowerCase().includes(lowerSearchTerm);
+            const matchesUser = !userPattern || f.key.includes(userPattern);
             return matchesSearch && matchesUser;
         });
     }, [files, searchTerm, selectedUser]);
