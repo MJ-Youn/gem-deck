@@ -1,5 +1,5 @@
-import { serialize } from 'cookie';
-import { signSession } from '../utils/crypto';
+import { parse, serialize } from '../utils/cookie.ts';
+import { signSession } from '../utils/crypto.ts';
 
 interface Env {
     GOOGLE_CLIENT_ID: string;
@@ -21,9 +21,31 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const { request, env } = context;
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
+    const state = url.searchParams.get('state');
+
+    // state 쿠키 파싱
+    const cookies = parse(request.headers.get('Cookie') || '');
+    const storedState = cookies['oauth_state'];
+
+    // state 초기화 쿠키 (성공/실패 여부와 상관없이 삭제)
+    const clearStateCookie = serialize('oauth_state', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 0,
+        sameSite: 'lax',
+    });
 
     if (!code) {
         return new Response('Missing code', { status: 400 });
+    }
+
+    // CSRF 방지를 위한 state 검증
+    if (!state || !storedState || state !== storedState) {
+        return new Response('Invalid state', {
+            status: 403,
+            headers: { 'Set-Cookie': clearStateCookie }
+        });
     }
 
     // Exchange code for token
@@ -42,7 +64,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const tokenData = (await tokenResponse.json()) as any;
 
     if (tokenData.error || !tokenData.access_token) {
-        return new Response(`Token Error: ${JSON.stringify(tokenData)}`, { status: 401 });
+        return new Response(`Token Error: ${JSON.stringify(tokenData)}`, {
+            status: 401,
+            headers: { 'Set-Cookie': clearStateCookie }
+        });
     }
 
     // Get User Info
@@ -58,7 +83,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         picture: userData.picture,
     }, env.ENCRYPTION_SECRET);
 
-    const cookie = serialize('auth_session', sessionData, {
+    const authCookie = serialize('auth_session', sessionData, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // Only secure in production
         path: '/',
@@ -66,11 +91,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         sameSite: 'lax',
     });
 
-    return new Response(null, {
+    const response = new Response(null, {
         status: 302,
         headers: {
             Location: '/dashboard',
-            'Set-Cookie': cookie,
         },
     });
+
+    // 인증 세션 쿠키 설정 및 state 쿠키 삭제
+    response.headers.append('Set-Cookie', authCookie);
+    response.headers.append('Set-Cookie', clearStateCookie);
+
+    return response;
 };
