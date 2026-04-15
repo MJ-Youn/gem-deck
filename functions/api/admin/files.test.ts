@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { onRequestDelete } from './files.ts';
 import { encryptPath, signSession } from '../../utils/crypto.ts';
 
-test('onRequestDelete (admin) deletes images and html file using multiple calls (current)', async () => {
+test('onRequestDelete (admin) deletes images and html file using multiple calls (Regex based)', async () => {
     const secret = 'test-secret';
     const adminEmail = 'admin@example.com';
     const docKey = 'docs/user@example.com/test.html';
@@ -58,7 +58,7 @@ test('onRequestDelete (admin) deletes images and html file using multiple calls 
 
     assert.strictEqual(result.success, true);
 
-    // Optimized implementation: 1 bulk call for images + 1 call for html = 2 calls
+    // 1 bulk call for images + 1 call for html = 2 calls
     assert.strictEqual(deleteCallCount, 2);
 
     // Verify bulk delete was called with an array
