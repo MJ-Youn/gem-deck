@@ -8,6 +8,7 @@ interface Env {
     GEM_DECK: R2Bucket;
     TURNSTILE_SECRET_KEY?: string;
     ENCRYPTION_SECRET: string;
+    ENCRYPTION_SALT?: string;
 }
 
 /**
@@ -64,7 +65,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         let cryptoKeyPromise: Promise<CryptoKey> | null = null;
         const getSharedKey = () => {
             if (!cryptoKeyPromise) {
-                cryptoKeyPromise = getCryptoKey(env.ENCRYPTION_SECRET);
+                cryptoKeyPromise = getCryptoKey(env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT);
             }
             return cryptoKeyPromise;
         };
@@ -86,7 +87,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                     imagePromises.push((async () => {
                         try {
                             const key = await getSharedKey();
-                            const decryptedPath = await decryptPath(pathOrHex, key);
+                            const decryptedPath = await decryptPath(pathOrHex, key, env.ENCRYPTION_SALT);
                             if (decryptedPath && decryptedPath.startsWith(`image/${email}/`)) {
                                 imagesToDelete.push(decryptedPath);
                             }

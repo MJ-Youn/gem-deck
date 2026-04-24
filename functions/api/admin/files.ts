@@ -5,6 +5,7 @@ interface Env {
   GEM_DECK: R2Bucket;
   ADMIN_EMAIL: string;
   ENCRYPTION_SECRET: string;
+  ENCRYPTION_SALT?: string;
 }
 
 /**
@@ -57,7 +58,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
       // src 속성 추출을 위해 유연한 정규식 사용 (공백 및 다양한 따옴표 대응)
       const imagesToDelete: string[] = [];
       const imagePromises: Promise<void>[] = [];
-      const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET);
+      const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT);
 
       const imgTagRegex = /<img[^>]+src\s*=\s*["']?([^"'\s>]+)["']?[^>]*>/gi;
       let match;
@@ -69,7 +70,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
               
               imagePromises.push((async () => {
                   try {
-                      const decryptedPath = await decryptPath(encryptedHex, cryptoKey);
+                      const decryptedPath = await decryptPath(encryptedHex, cryptoKey, env.ENCRYPTION_SALT);
                       if (decryptedPath) {
                           // 보안 검사: 이미지가 동일한 사용자에게 속하거나 합당한지 확인
                           // 관리자의 경우, 파일에 링크되어 있다면 삭제되어야 한다고 신뢰함.
