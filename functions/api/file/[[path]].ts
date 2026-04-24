@@ -3,6 +3,7 @@ import { decryptPath } from '../../utils/crypto.ts'
 interface Env {
   GEM_DECK: R2Bucket
   ENCRYPTION_SECRET: string
+  ENCRYPTION_SALT?: string
 }
 
 /**
@@ -26,7 +27,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // 보안 강화: 암호화된 단일 경로만 허용 (IDOR 방지)
   // Only allow encrypted paths to prevent unauthorized direct access.
   if (Array.isArray(pathParam) && pathParam.length === 1) {
-    key = await decryptPath(pathParam[0], env.ENCRYPTION_SECRET)
+    key = await decryptPath(pathParam[0], env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT)
   }
 
   if (!key) {

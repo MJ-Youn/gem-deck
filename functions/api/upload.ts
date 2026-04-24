@@ -8,6 +8,7 @@ import { sanitizeFilename } from '../utils/path';
 interface Env {
     GEM_DECK: R2Bucket;
     ENCRYPTION_SECRET: string;
+    ENCRYPTION_SALT?: string;
     TURNSTILE_SECRET_KEY?: string;
     MAX_FILE_SIZE?: string;
 }
@@ -74,7 +75,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const imageMapping = new Map<string, string>();
     const usedImages = new Set<string>();
 
-    const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET);
+    const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT);
 
     // 2. 이미지 분석
     $('img').each((_, elem) => {
@@ -99,7 +100,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                     httpMetadata: { contentType: img.type },
                 });
 
-                const encryptedKey = await encryptPath(key, cryptoKey);
+                const encryptedKey = await encryptPath(key, cryptoKey, env.ENCRYPTION_SALT);
                 imageMapping.set(img.name, `/api/file/${encryptedKey}`);
             }
         }),

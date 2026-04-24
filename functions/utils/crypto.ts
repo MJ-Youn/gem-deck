@@ -1,26 +1,44 @@
 /**
- * 비밀 키를 사용하여 암호화 키를 생성합니다.
+ * 비밀 키와 salt를 사용하여 암호화 키를 생성하고 캐싱합니다.
  *
  * @param secret 비밀 키 문자열
+ * @param salt 키 파생에 사용할 salt
  * @returns 생성된 CryptoKey Promise
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
+ * @since 2026-02-14
  */
-export async function getCryptoKey(secret: string): Promise<CryptoKey> {
-    const enc = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'PBKDF2' }, false, ['deriveKey']);
-    return crypto.subtle.deriveKey(
-        {
-            name: 'PBKDF2',
-            salt: enc.encode('salt'), // 결정론적 키 파생을 위한 고정 salt
-            iterations: 100000,
-            hash: 'SHA-256',
-        },
-        keyMaterial,
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt'],
-    );
+const keyCache = new Map<string, Promise<CryptoKey>>();
+
+export function getCryptoKey(secret: string, salt: string = 'salt'): Promise<CryptoKey> {
+    const cacheKey = `${secret}:${salt}`;
+    const cached = keyCache.get(cacheKey);
+    if (cached) return cached;
+
+    const promise = (async () => {
+        const enc = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            enc.encode(secret),
+            { name: 'PBKDF2' },
+            false,
+            ['deriveKey']
+        );
+        return crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: enc.encode(salt),
+                iterations: 100000,
+                hash: 'SHA-256',
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            true,
+            ['encrypt', 'decrypt'],
+        );
+    })();
+
+    keyCache.set(cacheKey, promise);
+    return promise;
 }
 
 
@@ -118,12 +136,13 @@ export async function verifySession<T>(token: string, secret: string): Promise<T
  *
  * @param path 암호화할 경로
  * @param secretOrKey 비밀 키 또는 이미 생성된 CryptoKey
+ * @param salt 키 파생에 사용할 salt (secretOrKey가 string인 경우)
  * @returns IV와 암호문이 결합된 16진수 문자열
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-03
+ * @since 2026-02-14
  */
-export async function encryptPath(path: string, secretOrKey: string | CryptoKey): Promise<string> {
-    const key = typeof secretOrKey === 'string' ? await getCryptoKey(secretOrKey) : secretOrKey;
+export async function encryptPath(path: string, secretOrKey: string | CryptoKey, salt: string = 'salt'): Promise<string> {
+    const key = typeof secretOrKey === 'string' ? await getCryptoKey(secretOrKey, salt) : secretOrKey;
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const encoded = new TextEncoder().encode(path);
 
@@ -138,13 +157,14 @@ export async function encryptPath(path: string, secretOrKey: string | CryptoKey)
  *
  * @param encryptedHex 암호화된 16진수 문자열
  * @param secretOrKey 비밀 키 또는 이미 생성된 CryptoKey
+ * @param salt 키 파생에 사용할 salt (secretOrKey가 string인 경우)
  * @returns 복호화된 경로 문자열 또는 실패 시 null
  * @author 윤명준 (MJ Yune)
- * @since 2026-02-02
+ * @since 2026-02-14
  */
-export async function decryptPath(encryptedHex: string, secretOrKey: string | CryptoKey): Promise<string | null> {
+export async function decryptPath(encryptedHex: string, secretOrKey: string | CryptoKey, salt: string = 'salt'): Promise<string | null> {
     try {
-        const key = typeof secretOrKey === 'string' ? await getCryptoKey(secretOrKey) : secretOrKey;
+        const key = typeof secretOrKey === 'string' ? await getCryptoKey(secretOrKey, salt) : secretOrKey;
         const data = hex2buf(encryptedHex);
 
         // 첫 12바이트는 IV
@@ -155,6 +175,10 @@ export async function decryptPath(encryptedHex: string, secretOrKey: string | Cr
 
         return new TextDecoder().decode(decrypted);
     } catch {
+        // 지정된 salt로 복호화 실패 시, 레거시 salt('salt')로 재시도하여 하위 호환성 유지
+        if (typeof secretOrKey === 'string' && salt !== 'salt') {
+            return decryptPath(encryptedHex, secretOrKey, 'salt');
+        }
         return null;
     }
 }

@@ -59,14 +59,42 @@ test('getCryptoKey returns a valid CryptoKey object', async () => {
     assert.strictEqual(key.extractable, true);
 });
 
-test('encryptPath and decryptPath round-trip correctly', async () => {
+test('getCryptoKey returns deterministic keys for same secret and salt', async () => {
+    const secret = 'my-secret';
+    const salt = 'my-salt';
+    const key1 = await getCryptoKey(secret, salt);
+    const key2 = await getCryptoKey(secret, salt);
+    assert.strictEqual(key1, key2); // Should be same instance due to caching
+});
+
+test('getCryptoKey returns different keys for different salts', async () => {
+    const secret = 'my-secret';
+    const key1 = await getCryptoKey(secret, 'salt1');
+    const key2 = await getCryptoKey(secret, 'salt2');
+    assert.notStrictEqual(key1, key2);
+});
+
+test('encryptPath and decryptPath round-trip correctly with salt', async () => {
     const path = '/some/path/to/resource';
     const secret = 'super-secret-key';
-    const encrypted = await encryptPath(path, secret);
+    const salt = 'unique-salt';
+    const encrypted = await encryptPath(path, secret, salt);
     assert.notStrictEqual(encrypted, path);
 
-    const decrypted = await decryptPath(encrypted, secret);
+    const decrypted = await decryptPath(encrypted, secret, salt);
     assert.strictEqual(decrypted, path);
+});
+
+test('decryptPath fallback to legacy salt', async () => {
+    const path = '/legacy/path';
+    const secret = 'secret';
+
+    // Encrypt with legacy salt
+    const encryptedLegacy = await encryptPath(path, secret, 'salt');
+
+    // Decrypt with new salt should still work due to fallback
+    const decryptedWithNewSalt = await decryptPath(encryptedLegacy, secret, 'new-salt');
+    assert.strictEqual(decryptedWithNewSalt, path);
 });
 
 test('encryptPath produces different outputs for the same input', async () => {
@@ -108,15 +136,16 @@ test('encryptPath and decryptPath work with CryptoKey input', async () => {
 test('encryptPath and decryptPath interoperability between string secret and CryptoKey', async () => {
     const path = '/interop/path';
     const secret = 'interop-secret';
-    const key = await getCryptoKey(secret);
+    const salt = 'interop-salt';
+    const key = await getCryptoKey(secret, salt);
 
     // Encrypt with Key, Decrypt with Secret
     const encryptedWithKey = await encryptPath(path, key);
-    const decryptedWithSecret = await decryptPath(encryptedWithKey, secret);
+    const decryptedWithSecret = await decryptPath(encryptedWithKey, secret, salt);
     assert.strictEqual(decryptedWithSecret, path);
 
     // Encrypt with Secret, Decrypt with Key
-    const encryptedWithSecret = await encryptPath(path, secret);
+    const encryptedWithSecret = await encryptPath(path, secret, salt);
     const decryptedWithKey = await decryptPath(encryptedWithSecret, key);
     assert.strictEqual(decryptedWithKey, path);
 });
