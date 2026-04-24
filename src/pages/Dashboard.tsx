@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
 import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, FileCode, Link, File } from 'lucide-react';
@@ -392,10 +392,13 @@ export function Dashboard() {
         }
     };
 
-    const filteredFiles = files.filter((f) =>
-        f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.key.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredFiles = useMemo(() => {
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        return files.filter((f) =>
+            f.display_name.toLowerCase().includes(lowerSearchTerm) ||
+            f.key.toLowerCase().includes(lowerSearchTerm)
+        );
+    }, [files, searchTerm]);
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-slate-200">
