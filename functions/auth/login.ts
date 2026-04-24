@@ -1,4 +1,5 @@
 import { serialize } from '../utils/cookie.ts'
+import { verifyTurnstile } from '../utils/turnstile.ts';
 
 /**
  * 로그인 요청을 처리합니다.
@@ -20,19 +21,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   // Verify Turnstile Token
   const secretKey = env.TURNSTILE_SECRET_KEY || ''
+  const ip = request.headers.get('CF-Connecting-IP') || undefined;
   
-  const formData = new FormData()
-  formData.append('secret', secretKey)
-  formData.append('response', cfToken)
-  formData.append('remoteip', request.headers.get('CF-Connecting-IP') || '')
-
-  const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body: formData
-  })
-
-  const outcome = await result.json() as { success: boolean }
-  if (!outcome.success) {
+  if (!(await verifyTurnstile(cfToken, secretKey, ip))) {
     return new Response('Turnstile verification failed', { status: 403 })
   }
 
