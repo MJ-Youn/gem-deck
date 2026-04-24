@@ -153,7 +153,7 @@ export function Dashboard() {
     const executeDelete = async (key: string, token: string) => {
         try {
             const actualName = key.split('/').pop();
-            const res = await fetch(`/api/docs/${actualName}`, {
+            const res = await fetch(`/api/docs/${encodeURIComponent(actualName || '')}`, {
                 method: 'DELETE',
                 headers: { 'X-Turnstile-Token': token },
             });
@@ -311,7 +311,7 @@ export function Dashboard() {
 
         try {
             const actualName = editingFile.split('/').pop();
-            const res = await fetch(`/api/docs/${actualName}`, {
+            const res = await fetch(`/api/docs/${encodeURIComponent(actualName || '')}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: renameValue }),

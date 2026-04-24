@@ -47,7 +47,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // Add security headers: Prevent XSS and MIME sniffing
   headers.set('X-Content-Type-Options', 'nosniff')
   headers.set('X-Frame-Options', 'DENY')
-  headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data:; sandbox allow-scripts allow-forms allow-popups;")
+  headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src * data:; sandbox allow-scripts allow-forms allow-popups;")
 
   return new Response(object.body, { headers })
 }
