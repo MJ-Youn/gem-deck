@@ -1,8 +1,8 @@
 import { parse } from '../../utils/cookie.ts';
 import { load } from 'cheerio';
-import { verifyTurnstile } from '../../utils/turnstile';
-import { decryptPath, verifySession, getCryptoKey } from '../../utils/crypto';
-import { sanitizeFilename } from '../../utils/path';
+import { verifyTurnstile } from '../../utils/turnstile.ts';
+import { decryptPath, verifySession, getCryptoKey } from '../../utils/crypto.ts';
+import { sanitizeFilename } from '../../utils/path.ts';
 
 interface Env {
     GEM_DECK: R2Bucket;

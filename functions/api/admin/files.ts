@@ -16,7 +16,7 @@ interface Env {
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-02
  */
-import { decryptPath, getCryptoKey, verifySession } from '../../utils/crypto';
+import { decryptPath, getCryptoKey, verifySession } from '../../utils/crypto.ts';
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
