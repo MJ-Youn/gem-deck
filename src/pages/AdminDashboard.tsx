@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner';
 import { Trash2, LogOut, Loader2, Search, Server, Cloud, Database, FileText, Image as ImageIcon, ExternalLink, ShieldCheck, Users, Copy, LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
-import { DocFile, SystemStatus } from '../types';
+import { DocFile, SystemStatus, AuthResponse } from '../types';
 import { handleCopyLink } from '../utils/clipboard';
 
 /**
@@ -73,7 +73,7 @@ export function AdminDashboard() {
     const checkAuthAndFetchData = async () => {
         try {
             // 1. Check Auth & Admin Status
-            const { data: authData } = (await axios.get('/auth/me')) as { data: any };
+            const { data: authData } = await axios.get<AuthResponse>('/auth/me');
             if (!authData.authenticated || !authData.isAdmin) {
                 toast.error('접근 권한이 없습니다.');
                 navigate('/dashboard');
@@ -166,22 +166,32 @@ export function AdminDashboard() {
 
 
     const users = useMemo(() => {
-        return Array.from(
-            new Set(
-                files.map((f) => {
-                    const parts = f.key.split('/');
-                    // key format: docs/email/filename
-                    return parts.length > 2 ? parts[1] : 'Unknown';
-                }),
-            ),
-        ).sort();
+        const userSet = new Set<string>();
+        for (const file of files) {
+            const key = file.key;
+            const firstSlash = key.indexOf('/');
+            if (firstSlash !== -1) {
+                const secondSlash = key.indexOf('/', firstSlash + 1);
+                if (secondSlash !== -1) {
+                    userSet.add(key.substring(firstSlash + 1, secondSlash));
+                    continue;
+                }
+            }
+            userSet.add('Unknown');
+        }
+        return Array.from(userSet).sort();
     }, [files]);
 
     const filteredFiles = useMemo(() => {
+        if (!searchTerm && selectedUser === 'all') return files;
+
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        const userPattern = selectedUser === 'all' ? null : `/${selectedUser}/`;
+
         return files.filter((f) => {
-            const matchesSearch = f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                 f.key.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesUser = selectedUser === 'all' ? true : f.key.includes(`/${selectedUser}/`);
+            const matchesSearch =
+                !lowerSearchTerm || f.display_name.toLowerCase().includes(lowerSearchTerm) || f.key.toLowerCase().includes(lowerSearchTerm);
+            const matchesUser = !userPattern || f.key.includes(userPattern);
             return matchesSearch && matchesUser;
         });
     }, [files, searchTerm, selectedUser]);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { AuthResponse } from '../types';
 import { Sparkles } from 'lucide-react';
 import Turnstile from 'react-turnstile';
 
@@ -30,7 +31,7 @@ export function Login() {
      */
     const checkAuth = async () => {
         try {
-            const { data } = (await axios.get('/auth/me')) as { data: any };
+            const { data } = await axios.get<AuthResponse>('/auth/me');
             if (data.authenticated) {
                 navigate('/dashboard');
             }

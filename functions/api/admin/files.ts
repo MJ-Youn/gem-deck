@@ -1,5 +1,5 @@
 import { parse } from '../../utils/cookie.ts';
-import { load } from 'cheerio';
+import { decryptPath, getCryptoKey, verifySession } from '../../utils/crypto';
 
 interface Env {
   GEM_DECK: R2Bucket;
@@ -10,14 +10,13 @@ interface Env {
 /**
  * 관리자 권한으로 파일 삭제 요청을 처리합니다.
  * 키(Key)를 기반으로 특정 파일을 삭제할 수 있습니다.
+ * HTML 파일의 경우, 연관된 이미지들을 함께 삭제합니다.
  *
  * @param context Pages 컨텍스트
  * @returns 처리 결과 Response
  * @author 윤명준 (MJ Yune)
  * @since 2026-02-02
  */
-import { decryptPath, getCryptoKey, verifySession } from '../../utils/crypto.ts';
-
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
@@ -53,15 +52,17 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
   if (object) {
       const htmlContent = await object.text();
-      const $ = load(htmlContent);
 
+      // cheerio 대신 정규식을 사용하여 <img src="..."> 속성을 추출 (Code Health Improvement)
+      // src 속성 추출을 위해 유연한 정규식 사용 (공백 및 다양한 따옴표 대응)
       const imagesToDelete: string[] = [];
       const imagePromises: Promise<void>[] = [];
-
       const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET);
 
-      $('img').each((_, elem) => {
-          const src = $(elem).attr('src');
+      const imgTagRegex = /<img[^>]+src\s*=\s*["']?([^"'\s>]+)["']?[^>]*>/gi;
+      let match;
+      while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+          const src = match[1];
           // src 형식: /api/file/<encryptedHex>
           if (src && src.startsWith('/api/file/')) {
               const encryptedHex = src.replace('/api/file/', '');
@@ -82,7 +83,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                   }
               })());
           }
-      });
+      }
 
       await Promise.all(imagePromises);
 
