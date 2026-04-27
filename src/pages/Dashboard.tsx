@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, FileCode, Link, File } from 'lucide-react';
+import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, FileCode, Link, File as FileIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
@@ -365,7 +365,7 @@ export function Dashboard() {
             case 'gif':
             case 'webp': return <ImageIcon size={size} />;
             case 'svg': return <FileCode size={size} />;
-            default: return <File size={size} />;
+            default: return <FileIcon size={size} />;
         }
     };
 
