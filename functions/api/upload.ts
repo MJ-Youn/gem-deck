@@ -1,9 +1,8 @@
 import { parse } from '../utils/cookie.ts';
-import { load } from 'cheerio';
 
-import { encryptPath, getCryptoKey, verifySession } from '../utils/crypto';
-import { verifyTurnstile } from '../utils/turnstile';
-import { sanitizeFilename } from '../utils/path';
+import { encryptPath, getCryptoKey, verifySession } from '../utils/crypto.ts';
+import { verifyTurnstile } from '../utils/turnstile.ts';
+import { sanitizeFilename } from '../utils/path.ts';
 
 interface Env {
     GEM_DECK: R2Bucket;
@@ -70,7 +69,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // 1. HTML 파싱
     const htmlContent = await htmlFile.text();
-    const $ = load(htmlContent);
 
     const imageMapping = new Map<string, string>();
     const usedImages = new Set<string>();
@@ -78,15 +76,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const cryptoKey = await getCryptoKey(env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT);
 
     // 2. 이미지 분석
-    $('img').each((_, elem) => {
-        const src = $(elem).attr('src');
+    const imgTagRegex = /<img[^>]+src\s*=\s*["']?([^"'\s>]+)["']?[^>]*>/gi;
+    let match;
+    while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+        const src = match[1];
         if (src && !src.startsWith('http') && !src.startsWith('//')) {
             const filename = src.split('/').pop();
             if (filename) {
                 usedImages.add(filename);
             }
         }
-    });
+    }
 
     // 3. 이미지 업로드
     await Promise.all(
@@ -107,14 +107,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     );
 
     // 4. 경로 재작성 (Rewrite)
-    $('img').each((_, elem) => {
-        const src = $(elem).attr('src');
+    const rewrittenHtml = htmlContent.replace(imgTagRegex, (tag, src) => {
         if (src) {
             const filename = src.split('/').pop();
             if (filename && imageMapping.has(filename)) {
-                $(elem).attr('src', imageMapping.get(filename)!);
+                return tag.replace(src, imageMapping.get(filename)!);
             }
         }
+        return tag;
     });
 
     // 5. HTML 파일 업로드
@@ -122,7 +122,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // 현재 구조상 전체 키 사용.
     const sanitizedName = sanitizeFilename(htmlFile.name);
     const htmlKey = `docs/${email}/${sanitizedName}`;
-    await env.GEM_DECK.put(htmlKey, $.html(), {
+    await env.GEM_DECK.put(htmlKey, rewrittenHtml, {
         httpMetadata: { contentType: 'text/html' },
     });
 

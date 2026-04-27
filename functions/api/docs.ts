@@ -1,6 +1,6 @@
 import { parse } from '../utils/cookie.ts'
 
-import { encryptPath, getCryptoKey, verifySession } from '../utils/crypto'
+import { encryptPath, getCryptoKey, verifySession } from '../utils/crypto.ts'
 
 interface Env {
   GEM_DECK: R2Bucket

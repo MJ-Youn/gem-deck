@@ -1,8 +1,7 @@
 import { parse } from '../../utils/cookie.ts';
-import { load } from 'cheerio';
-import { verifyTurnstile } from '../../utils/turnstile';
-import { decryptPath, verifySession, getCryptoKey } from '../../utils/crypto';
-import { sanitizeFilename } from '../../utils/path';
+import { verifyTurnstile } from '../../utils/turnstile.ts';
+import { decryptPath, verifySession, getCryptoKey } from '../../utils/crypto.ts';
+import { sanitizeFilename } from '../../utils/path.ts';
 
 interface Env {
     GEM_DECK: R2Bucket;
@@ -56,22 +55,14 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
     if (object) {
         const htmlContent = await object.text();
-        const $ = load(htmlContent);
 
         const imagesToDelete: string[] = [];
         const imagePromises: Promise<void>[] = [];
 
-        // Pre-derive key for decryption loop
-        let cryptoKeyPromise: Promise<CryptoKey> | null = null;
-        const getSharedKey = () => {
-            if (!cryptoKeyPromise) {
-                cryptoKeyPromise = getCryptoKey(env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT);
-            }
-            return cryptoKeyPromise;
-        };
-
-        $('img').each((_, elem) => {
-            const src = $(elem).attr('src');
+        const imgTagRegex = /<img[^>]+src\s*=\s*["']?([^"'\s>]+)["']?[^>]*>/gi;
+        let match;
+        while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+            const src = match[1];
 
             if (src && src.startsWith('/api/file/')) {
                 const pathOrHex = src.replace('/api/file/', '');
@@ -86,8 +77,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                 else {
                     imagePromises.push((async () => {
                         try {
-                            const key = await getSharedKey();
-                            const decryptedPath = await decryptPath(pathOrHex, key, env.ENCRYPTION_SALT);
+                            const decryptedPath = await decryptPath(pathOrHex, env.ENCRYPTION_SECRET, env.ENCRYPTION_SALT);
                             if (decryptedPath && decryptedPath.startsWith(`image/${email}/`)) {
                                 imagesToDelete.push(decryptedPath);
                             }
@@ -97,7 +87,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
                     })());
                 }
             }
-        });
+        }
 
         await Promise.all(imagePromises);
 
