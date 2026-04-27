@@ -12,7 +12,7 @@ const mockEnv = {
     TURNSTILE_SECRET_KEY: 'turnstile_secret'
 };
 
-test('Login handler should generate and set oauth_state cookie', async (t) => {
+test('Login handler should generate and set oauth_state cookie', async () => {
     // Mock Turnstile verification to succeed
     const originalFetch = globalThis.fetch;
     globalThis.fetch = async () => new Response(JSON.stringify({ success: true }));
@@ -63,7 +63,7 @@ test('Callback handler should reject request with mismatched state', async () =>
     assert.ok(setCookie?.includes('oauth_state=;'), 'Should clear state cookie on failure');
 });
 
-test('Callback handler should accept request with matching state', async (t) => {
+test('Callback handler should accept request with matching state', async () => {
     // Mock OAuth token and user info fetch
     const originalFetch = globalThis.fetch;
     globalThis.fetch = async (url) => {
@@ -87,8 +87,8 @@ test('Callback handler should accept request with matching state', async (t) => 
         assert.strictEqual(response.headers.get('Location'), '/dashboard');
 
         const setCookies = response.headers.getSetCookie();
-        assert.ok(setCookies.some(c => c.includes('auth_session=')), 'Should set auth_session cookie');
-        assert.ok(setCookies.some(c => c.includes('oauth_state=;')), 'Should clear oauth_state cookie');
+        assert.ok(setCookies.some((c: string) => c.includes('auth_session=')), 'Should set auth_session cookie');
+        assert.ok(setCookies.some((c: string) => c.includes('oauth_state=;')), 'Should clear oauth_state cookie');
     } finally {
         globalThis.fetch = originalFetch;
     }

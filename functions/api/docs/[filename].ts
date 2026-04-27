@@ -1,4 +1,5 @@
 import { parse } from '../../utils/cookie.ts';
+import { load } from 'cheerio';
 import { verifyTurnstile } from '../../utils/turnstile.ts';
 import { decryptPath, verifySession, getCryptoKey } from '../../utils/crypto.ts';
 import { sanitizeFilename } from '../../utils/path.ts';

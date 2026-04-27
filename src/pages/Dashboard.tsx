@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, FileCode, Link, File } from 'lucide-react';
+import { Upload, FileText, Trash2, LogOut, Loader2, Image as ImageIcon, ExternalLink, Search, LayoutGrid, List as ListIcon, Pencil, Check, X, FileCode, Link, File as FileIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Turnstile from 'react-turnstile';
 import { Footer } from '../components/Footer';
@@ -153,7 +153,7 @@ export function Dashboard() {
     const executeDelete = async (key: string, token: string) => {
         try {
             const actualName = key.split('/').pop();
-            const res = await fetch(`/api/docs/${actualName}`, {
+            const res = await fetch(`/api/docs/${encodeURIComponent(actualName || '')}`, {
                 method: 'DELETE',
                 headers: { 'X-Turnstile-Token': token },
             });
@@ -311,7 +311,7 @@ export function Dashboard() {
 
         try {
             const actualName = editingFile.split('/').pop();
-            const res = await fetch(`/api/docs/${actualName}`, {
+            const res = await fetch(`/api/docs/${encodeURIComponent(actualName || '')}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: renameValue }),
@@ -365,7 +365,7 @@ export function Dashboard() {
             case 'gif':
             case 'webp': return <ImageIcon size={size} />;
             case 'svg': return <FileCode size={size} />;
-            default: return <File size={size} />;
+            default: return <FileIcon size={size} />;
         }
     };
 
@@ -392,10 +392,13 @@ export function Dashboard() {
         }
     };
 
-    const filteredFiles = files.filter((f) =>
-        f.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.key.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredFiles = useMemo(() => {
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        return files.filter((f) =>
+            f.display_name.toLowerCase().includes(lowerSearchTerm) ||
+            f.key.toLowerCase().includes(lowerSearchTerm)
+        );
+    }, [files, searchTerm]);
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-slate-200">

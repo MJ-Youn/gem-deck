@@ -1,7 +1,3 @@
-/**
- * Simple cookie utility for when the 'cookie' package is not available.
- */
-
 export interface CookieSerializeOptions {
   domain?: string;
   encode?(val: string): string;

@@ -1,5 +1,5 @@
 import { parse } from '../utils/cookie.ts';
-import { verifySession } from '../utils/crypto';
+import { verifySession } from '../utils/crypto.ts';
 
 interface Env {
   GEM_DECK: R2Bucket;
@@ -86,7 +86,7 @@ async function handleGet(request: Request, env: Env, email: string, isAdmin: boo
       'Content-Type': 'text/html; charset=utf-8',
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data:; sandbox allow-scripts allow-forms allow-popups;",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src * data:; sandbox allow-scripts allow-forms allow-popups;",
     },
   });
 }
