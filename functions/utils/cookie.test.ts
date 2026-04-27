@@ -42,7 +42,8 @@ test('serialize with sameSite', () => {
   assert.strictEqual(serialize('foo', 'bar', { sameSite: 'lax' }), 'foo=bar; SameSite=Lax');
   assert.strictEqual(serialize('foo', 'bar', { sameSite: 'strict' }), 'foo=bar; SameSite=Strict');
   assert.strictEqual(serialize('foo', 'bar', { sameSite: 'none' }), 'foo=bar; SameSite=None');
-  assert.strictEqual(serialize('foo', 'bar', { sameSite: 'LAX' as any }), 'foo=bar; SameSite=Lax');
+  // Test case insensitivity using a string that is a valid union member when lowercased
+  assert.strictEqual(serialize('foo', 'bar', { sameSite: 'LAX' as 'lax' }), 'foo=bar; SameSite=Lax');
 });
 
 test('serialize with custom encode', () => {
