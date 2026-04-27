@@ -1,4 +1,4 @@
-import { serialize } from '../utils/cookie.ts'
+import { serialize } from '../utils/cookie.ts';
 import { verifyTurnstile } from '../utils/turnstile.ts';
 
 /**
