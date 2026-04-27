@@ -43,6 +43,8 @@ export function getCryptoKey(secret: string, salt: string = 'salt'): Promise<Cry
 
 
 
+const HEX_LOOKUP = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0'));
+
 /**
  * ArrayBuffer를 16진수 문자열로 변환합니다.
  *
@@ -52,7 +54,12 @@ export function getCryptoKey(secret: string, salt: string = 'salt'): Promise<Cry
  * @since 2026-02-03
  */
 function buf2hex(buffer: ArrayBuffer) {
-    return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, '0')).join('');
+    const bytes = new Uint8Array(buffer);
+    let hex = '';
+    for (let i = 0; i < bytes.length; i++) {
+        hex += HEX_LOOKUP[bytes[i]];
+    }
+    return hex;
 }
 
 /**
@@ -64,7 +71,12 @@ function buf2hex(buffer: ArrayBuffer) {
  * @since 2026-02-03
  */
 function hex2buf(hex: string) {
-    return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
+    const len = hex.length;
+    const view = new Uint8Array(len / 2);
+    for (let i = 0; i < len; i += 2) {
+        view[i >> 1] = parseInt(hex.substring(i, i + 2), 16);
+    }
+    return view;
 }
 
 /**
