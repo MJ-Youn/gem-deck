@@ -8,6 +8,10 @@ interface Env {
   ENCRYPTION_SALT?: string;
 }
 
+interface DeleteRequestBody {
+  key: string;
+}
+
 /**
  * 관리자 권한으로 파일 삭제 요청을 처리합니다.
  * 키(Key)를 기반으로 특정 파일을 삭제할 수 있습니다.
@@ -36,7 +40,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   }
 
   // 2. 요청 본문 파싱 (Parse Request Body)
-  let body: any;
+  let body: DeleteRequestBody;
   try {
     body = await request.json();
   } catch {
@@ -44,8 +48,8 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   }
 
   const { key } = body;
-  if (!key) {
-    return new Response('Bad Request: Missing key', { status: 400 });
+  if (!key || typeof key !== 'string') {
+    return new Response('Bad Request: Missing or invalid key', { status: 400 });
   }
 
   // 3. 로직: HTML 가져오기 -> 연관된 이미지 찾기 -> 이미지 삭제 -> HTML 삭제

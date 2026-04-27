@@ -11,6 +11,10 @@ interface Env {
     ENCRYPTION_SALT?: string;
 }
 
+interface RenameRequestBody {
+    name: string;
+}
+
 /**
  * 파일 삭제 요청을 처리합니다. HTML 파일과 연관된 이미지들을 함께 삭제합니다.
  *
@@ -136,7 +140,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         return new Response('Unauthorized', { status: 401 });
     }
 
-    let body: any;
+    let body: RenameRequestBody;
     try {
         body = await request.json();
     } catch {
@@ -144,8 +148,8 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
     }
 
     const newNameWithoutExt = body.name;
-    if (!newNameWithoutExt) {
-        return new Response('Missing name', { status: 400 });
+    if (!newNameWithoutExt || typeof newNameWithoutExt !== 'string') {
+        return new Response('Missing or invalid name', { status: 400 });
     }
 
     // Sanitize the filename to prevent path traversal
