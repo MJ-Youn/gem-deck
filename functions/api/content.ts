@@ -7,6 +7,11 @@ interface Env {
   ENCRYPTION_SECRET: string;
 }
 
+interface UpdateContentBody {
+  key: string;
+  content: string;
+}
+
 /**
  * 파일 내용 조회 및 저장을 처리하는 API
  * 
@@ -103,7 +108,7 @@ async function handleGet(request: Request, env: Env, email: string, isAdmin: boo
  * @since 2026-02-03
  */
 async function handlePut(request: Request, env: Env, email: string, isAdmin: boolean) {
-  let body: any;
+  let body: UpdateContentBody;
   try {
     body = await request.json();
   } catch {
@@ -112,8 +117,8 @@ async function handlePut(request: Request, env: Env, email: string, isAdmin: boo
 
   const { key, content } = body;
 
-  if (!key || content === undefined) {
-    return new Response('Bad Request: Missing key or content', { status: 400 });
+  if (!key || typeof key !== 'string' || content === undefined || typeof content !== 'string') {
+    return new Response('Bad Request: Missing or invalid key or content', { status: 400 });
   }
 
   // 권한 확인
